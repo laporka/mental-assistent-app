@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:test_app/screens/second_screen_hello.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -19,27 +20,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Тестовий додаток'),
-        ),
-        body: const Center(
-          // Якщо ти бачиш цей текст на екрані телефону/емулятора, 
-          // значить усе працює ідеально!
-          child: Text('Firebase успішно підключено!🎉'), 
-        ),
-      ),
+      home: const AFirstScreen(),
     );
   }
 }
-
-  // runApp(const MyApp());
-  // runApp(
-  //   const Center(
-  //     child: Text(
-  //       'Hello, World!',
-  //       textDirection: TextDirection.ltr,
-  //       style: TextStyle(color: Colors.blue),
-  //     ),
-  //   ),
-  // );
