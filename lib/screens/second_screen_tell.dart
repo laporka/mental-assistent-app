@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'third_screen_choose.dart';
 
 class AThirdScreen extends StatelessWidget {
   const AThirdScreen({super.key});
@@ -71,7 +72,12 @@ class AThirdScreen extends StatelessWidget {
               child: Center(
                 child: GestureDetector(
                   onTap: () {
-                    // TODO: Навігація на наступний екран
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AFourthScreen(),
+                      ),
+                    );
                   },
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
