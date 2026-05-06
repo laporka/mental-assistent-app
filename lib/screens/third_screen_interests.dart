@@ -1,30 +1,28 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../widgets/touch_glow_button.dart';
-import 'third_screen_interests.dart';
-import"package:hovering/hovering.dart";
 
-class AFourthScreen extends StatefulWidget {
-  const AFourthScreen({super.key});
+import '../widgets/touch_glow_button.dart';
+
+class AFifthScreen extends StatefulWidget {
+  const AFifthScreen({super.key});
 
   @override
-  State<AFourthScreen> createState() => _AFourthScreenState();
+  State<AFifthScreen> createState() => _AFifthScreenState();
 }
 
-class _AFourthScreenState extends State<AFourthScreen> {
-  // Тут ми зберігаємо індекси тих кнопок, які вибрав користувач
+class _AFifthScreenState extends State<AFifthScreen> {
   final Set<int> _selectedIndices = {};
 
-  // Список твоїх опцій (можеш легко додавати або змінювати їх тут)
-  final List<String> _symptoms = [
-    'ПТСР',
-    'Тривога',
-    'Панічна атака',
-    'Панічна атака',
-    'Панічна атака',
-    'Тривога',
-    'Панічна атака',
-    'Панічна атака',
+  final List<String> _interests = [
+    'Фільми',
+    'Книги',
+    'Кулінарія',
+    'Спорт',
+    'Наука',
+    'Танці',
+    'Рибалка',
+    'Походи',
+    'Інше',
   ];
 
   Widget _buildChip(int index, String text) {
@@ -78,6 +76,7 @@ class _AFourthScreenState extends State<AFourthScreen> {
                 height: 1,
               ),
             ),
+
             if (isSelected) ...[
               const SizedBox(width: 8),
               const Icon(
@@ -111,8 +110,8 @@ class _AFourthScreenState extends State<AFourthScreen> {
                 height: size.height * 0.8,
                 decoration: const ShapeDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment(-0.00, 0.61),
-                    end: Alignment(0.54, 1.02),
+                    begin: Alignment(1.06, 0.59),
+                    end: Alignment(0.26, 0.93),
                     colors: [
                       Color(0xFF2BBBFF),
                       Color(0xFF91FFA3),
@@ -123,18 +122,22 @@ class _AFourthScreenState extends State<AFourthScreen> {
                 ),
               ),
             ),
+
             Positioned.fill(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 90.0, sigmaY: 90.0),
-                child: Container(color: Colors.transparent),
+                child: Container(
+                  color: Colors.transparent,
+                ),
               ),
             ),
 
+            // --- ЗАГОЛОВОК ---
             const Positioned(
               left: 40,
               top: 120,
               child: Text(
-                'Що вас турбує?',
+                'Чим ви цікавитись ?',
                 style: TextStyle(
                   color: Color(0xFFF9FFFA),
                   fontSize: 24,
@@ -149,15 +152,18 @@ class _AFourthScreenState extends State<AFourthScreen> {
               left: 40,
               top: 170,
               bottom: 140,
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(
-                    _symptoms.length,
-                    (index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildChip(index, _symptoms[index]),
+              child: SizedBox(
+                width: 280,
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Wrap(
+                    alignment: WrapAlignment.start,
+                    runAlignment: WrapAlignment.start,
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: List.generate(
+                      _interests.length,
+                      (index) => _buildChip(index, _interests[index]),
                     ),
                   ),
                 ),
@@ -172,12 +178,12 @@ class _AFourthScreenState extends State<AFourthScreen> {
                 child: TouchGlowButton(
                   text: 'Продовжити далі',
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AFifthScreen(),
-                      ),
-                    );
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => const AFifthScreen(),
+                    //   ),
+                    // );
                   },
                 ),
               ),
