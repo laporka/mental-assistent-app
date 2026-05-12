@@ -33,15 +33,14 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
         height: size.height,
         child: Stack(
           children: [
-            // Та сама куля що і в first_screen_start
             Positioned(
-              left: -17,
-              top: size.height * 0.47,
+              bottom: -size.height * 0.15,
+              left: -size.width * 0.2,
+              right: -size.width * 0.2,
               child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
+                imageFilter: ImageFilter.blur(sigmaX: 120, sigmaY: 120),
                 child: Container(
-                  width: 393,
-                  height: 577,
+                  height: size.height * 0.65,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: LinearGradient(
@@ -58,18 +57,25 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
                 ),
               ),
             ),
-            // Текст
+
             Positioned(
-              left: 74,
               top: size.height * 0.35,
-              child: const Text(
-                'Iris\nМентальний\nАсистент',
-                style: TextStyle(
-                  fontFamily: 'Playfair',
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFFFAFFFB),
-                  height: 1.1,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: SizedBox(
+                  width: 280,
+                  child: const Text(
+                    'Iris\nМентальний\nАсистент',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontFamily: 'Tenor Sans',
+                      fontSize: 40,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFFFAFFFB),
+                      height: 1.1, 
+                    ),
+                  ),
                 ),
               ),
             ),

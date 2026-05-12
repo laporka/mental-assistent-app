@@ -1,8 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../widgets/touch_glow_button.dart';
-import 'third_screen_interests.dart';
-import"package:hovering/hovering.dart";
+import 'package:test_app/screens/third_screen_interests.dart';
+import '../widgets/dynamic_glow_button.dart'; // Наша винесена кнопка
+// import 'next_screen.dart'; // Підключи наступний екран
 
 class AFourthScreen extends StatefulWidget {
   const AFourthScreen({super.key});
@@ -12,19 +12,17 @@ class AFourthScreen extends StatefulWidget {
 }
 
 class _AFourthScreenState extends State<AFourthScreen> {
-  // Тут ми зберігаємо індекси тих кнопок, які вибрав користувач
   final Set<int> _selectedIndices = {};
 
-  // Список твоїх опцій (можеш легко додавати або змінювати їх тут)
-  final List<String> _symptoms = [
+  final List<String> _options = [
+    'Тривога',
+    'Самотність',
+    'Стрес',
+    'Панічні атаки',
     'ПТСР',
-    'Тривога',
-    'Панічна атака',
-    'Панічна атака',
-    'Панічна атака',
-    'Тривога',
-    'Панічна атака',
-    'Панічна атака',
+    'Втома',
+    'Труднощі зі сном',
+    'Нічого конкретного',
   ];
 
   Widget _buildChip(int index, String text) {
@@ -33,37 +31,26 @@ class _AFourthScreenState extends State<AFourthScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          if (isSelected) {
-            _selectedIndices.remove(index);
-          } else {
+          if (index == _options.length - 1) {
+            _selectedIndices.clear();
             _selectedIndices.add(index);
+          } else {
+            _selectedIndices.remove(_options.length - 1);
+            if (isSelected) {
+              _selectedIndices.remove(index);
+            } else {
+              _selectedIndices.add(index);
+            }
           }
         });
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: isSelected
-              ? const LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color(0xFF2BBBFF),
-                    Color(0xFF91FFA3),
-                    Color(0xFFFFCC00)
-                  ],
-                )
-              : LinearGradient(
-                  colors: [
-                    Colors.white.withOpacity(0.08),
-                    Colors.white.withOpacity(0.05)
-                  ],
-                ),
-          border: isSelected
-              ? null
-              : Border.all(color: Colors.white.withOpacity(0.1)),
+          borderRadius: BorderRadius.circular(100),
+          // Тільки зелена замальовка для вибраного, темно-зелена для неактивного
+          color: isSelected ? const Color(0xFF91FFA3) : const Color(0xFF274E3C),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -72,19 +59,15 @@ class _AFourthScreenState extends State<AFourthScreen> {
               text,
               style: TextStyle(
                 color: isSelected ? const Color(0xFF041219) : const Color(0xFFF9FFFA),
-                fontSize: 16,
+                fontSize: 20,
                 fontFamily: 'Inter',
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w400,
                 height: 1,
               ),
             ),
             if (isSelected) ...[
               const SizedBox(width: 8),
-              const Icon(
-                Icons.check_rounded,
-                size: 18,
-                color: Color(0xFF041219),
-              ),
+              const Icon(Icons.check_rounded, color: Color(0xFF041219), size: 20),
             ],
           ],
         ),
@@ -95,82 +78,101 @@ class _AFourthScreenState extends State<AFourthScreen> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final scaleX = size.width / 360;
+    final scaleY = size.height / 800;
+
+    final bool isActive = _selectedIndices.isNotEmpty;
 
     return Scaffold(
       backgroundColor: const Color(0xFF041219),
-      body: SizedBox(
-        width: size.width,
-        height: size.height,
-        child: Stack(
-          children: [
-            Positioned(
-              left: -size.width * 0.1,
-              top: -size.height * 0.4,
+      body: Stack(
+        children: [
+          Positioned(
+            left: -17 * scaleX,
+            top: -416 * scaleY,
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 120.0, sigmaY: 120.0),
               child: Container(
-                width: size.width * 1.2,
-                height: size.height * 0.8,
+                width: 393 * scaleX,
+                height: 577 * scaleY,
                 decoration: const ShapeDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment(-0.00, 0.61),
-                    end: Alignment(0.54, 1.02),
+                    begin: Alignment(-0.8, -0.6), 
+                    end: Alignment(0.8, 0.6),
                     colors: [
                       Color(0xFF2BBBFF),
                       Color(0xFF91FFA3),
-                      Color(0xFFFFCC00)
+                      Color(0xFF91FFA3),
+                      Color(0xFFFFCC00),
                     ],
+                    stops: [0.0, 0.3, 0.85, 1.0], 
                   ),
                   shape: OvalBorder(),
                 ),
               ),
             ),
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 90.0, sigmaY: 90.0),
-                child: Container(color: Colors.transparent),
-              ),
-            ),
+          ),
 
-            const Positioned(
-              left: 40,
-              top: 120,
-              child: Text(
-                'Що вас турбує?',
-                style: TextStyle(
-                  color: Color(0xFFF9FFFA),
-                  fontSize: 24,
-                  fontFamily: 'Inter',
-                  fontWeight: FontWeight.w500,
-                  height: 1,
+          Positioned(
+            top: 100 * scaleY,
+            left: 40,
+            right: 40,
+            bottom: 150, 
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Що зараз найважче?',
+                  style: TextStyle(
+                    color: Color(0xFFF9FFFA),
+                    fontSize: 24,
+                    fontFamily: 'Tenor Sans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.1,
+                  ),
                 ),
-              ),
-            ),
-
-            Positioned(
-              left: 40,
-              top: 170,
-              bottom: 140,
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(
-                    _symptoms.length,
-                    (index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildChip(index, _symptoms[index]),
+                const SizedBox(height: 8),
+                const Text(
+                  'Можна обрати кілька',
+                  style: TextStyle(
+                    color: Color(0xFFC9D0CE),
+                    fontSize: 16,
+                    fontFamily: 'Inter',
+                    fontWeight: FontWeight.w400,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                
+                // Інтерактивний прокручуваний список
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: List.generate(
+                        _options.length,
+                        (index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _buildChip(index, _options[index]),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
+          ),
 
-            Positioned(
-              bottom: 60,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: TouchGlowButton(
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: [
+                DynamicGlowButton(
                   text: 'Продовжити далі',
+                  isActive: isActive, 
                   onTap: () {
                     Navigator.push(
                       context,
@@ -180,10 +182,25 @@ class _AFourthScreenState extends State<AFourthScreen> {
                     );
                   },
                 ),
-              ),
+                const SizedBox(height: 20),
+                const Opacity(
+                  opacity: 0.70,
+                  child: Text(
+                    'Ці відповіді не є діагнозом\nВони допомагають мені зрозуміти тебе',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFFF9FFFA),
+                      fontSize: 13,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w300,
+                      height: 1.2,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
