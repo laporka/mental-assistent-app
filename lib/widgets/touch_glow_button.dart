@@ -20,7 +20,7 @@ class _TouchGlowButtonState extends State<TouchGlowButton> {
       onTapUp: (_) => setState(() => _isPressed = false),
       onTapCancel: () => setState(() => _isPressed = false),
       onTap: widget.onTap,
-      
+
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.all(2),
@@ -36,10 +36,10 @@ class _TouchGlowButtonState extends State<TouchGlowButton> {
           boxShadow: _isPressed
               ? [
                   BoxShadow(
-                    color: const Color(0xFF91FFA3).withOpacity(0.3),
+                    color: Color(0xFF91FFA3),
                     blurRadius: 15,
                     spreadRadius: 1,
-                    offset: const Offset(0, 4),
+                    offset: Offset(0, 4),
                   )
                 ]
               : [],

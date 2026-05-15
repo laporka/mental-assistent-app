@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../widgets/dynamic_glow_button.dart'; // Твій файл з кнопкою
+import '../widgets/dynamic_glow_button.dart';
+import 'fourth_screen_meet.dart';
 
 class AFifthScreen extends StatefulWidget {
   const AFifthScreen({super.key});
@@ -157,7 +158,12 @@ class _AFifthScreenState extends State<AFifthScreen> {
                   text: 'Продовжити далі',
                   isActive: isActive,
                   onTap: () {
-                    // TODO Перехід далі
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ASixthScreen(name: 'Катя'),
+                      ),
+                    );
                   },
                 ),
                 const SizedBox(height: 20),

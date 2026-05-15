@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:test_app/screens/first_screen_splash.dart';
 import 'dart:ui';
-import '../widgets/touch_glow_button.dart'; 
 import 'second_screen_hello.dart';
 
 class FirstScreenStart extends StatelessWidget {
@@ -70,8 +69,7 @@ class FirstScreenStart extends StatelessWidget {
               left: 0,
               right: 0,
               child: Center(
-                child: TouchGlowButton(
-                  text: 'Продовжити далі',
+                child: GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
@@ -80,6 +78,57 @@ class FirstScreenStart extends StatelessWidget {
                       ),
                     );
                   },
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Gradient copy — 1px right + 1px down
+                      Transform.translate(
+                        offset: const Offset(1, 1),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 64),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            gradient: const LinearGradient(
+                              begin: Alignment(0.97, -0.23),
+                              end: Alignment(-0.97, 0.23),
+                              colors: [
+                                Color(0xFF2BBCFF),
+                                Color(0xFF91FFA4),
+                                Color(0xFFFFCC00),
+                              ],
+                              stops: [0.0, 0.5, 1.0],
+                            ),
+                          ),
+                          child: const Text(
+                            'Продовжити далі',
+                            style: TextStyle(
+                              color: Colors.transparent,
+                              fontSize: 16,
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Main button
+                      Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 64),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF041219),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: const Text(
+                          'Продовжити далі',
+                          style: TextStyle(
+                            color: Color(0xFFF9FFFA),
+                            fontSize: 16,
+                            fontFamily: 'Inter',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
