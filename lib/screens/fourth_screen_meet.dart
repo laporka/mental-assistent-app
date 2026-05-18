@@ -1,12 +1,14 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../widgets/loading_helper.dart';
 import 'fifth_screen_loading.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/user_data.dart';
 
 class ASixthScreen extends StatelessWidget {
-  final String name;
 
-  const ASixthScreen({super.key, required this.name});
+  const ASixthScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +67,7 @@ class ASixthScreen extends StatelessWidget {
             left: 263 * scaleX,
             top: 176 * scaleY,
             child: Text(
-              name,
+              UserData.userName,
               style: const TextStyle(
                 color: Color(0xFFF9FFFA),
                 fontSize: 24,
@@ -83,13 +85,18 @@ class ASixthScreen extends StatelessWidget {
             right: 0,
             child: Center(
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FifthScreenLoading(),
-                    ),
-                  );
+                onTap: () async {
+                  LoadingHelper.show(context);
+                  await saveUserToFirebase();
+                  if (!context.mounted) return; 
+
+                  LoadingHelper.hide(context);
+                  // Navigator.push(
+                    // context,
+                    // MaterialPageRoute(
+                      // builder: (context) => const FifthScreenLoading(),
+                    // ),
+                  // );
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -124,5 +131,23 @@ class ASixthScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+Future<void> saveUserToFirebase() async {
+  try {
+    final usersCollection = FirebaseFirestore.instance.collection('users');
+
+    // Беремо дані прямо з нашого глобального класу UserData
+    await usersCollection.add({
+      'name': UserData.userName,
+      'hardest_things': UserData.hardestThings,
+      'interests': UserData.interests,
+      'created_at': FieldValue.serverTimestamp(),
+    });
+
+    print('Дані успішно збережено в Firebase! 🚀');
+  } catch (e) {
+    print('Помилка: $e');
   }
 }

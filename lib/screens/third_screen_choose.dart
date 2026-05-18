@@ -1,8 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:test_app/screens/third_screen_interests.dart';
-import '../widgets/dynamic_glow_button.dart'; // Наша винесена кнопка
-// import 'next_screen.dart'; // Підключи наступний екран
+import '../models/user_data.dart';
+import '../widgets/dynamic_glow_button.dart';
+
 
 class AFourthScreen extends StatefulWidget {
   const AFourthScreen({super.key});
@@ -174,6 +175,7 @@ class _AFourthScreenState extends State<AFourthScreen> {
                   text: 'Продовжити далі',
                   isActive: isActive, 
                   onTap: () {
+                    UserData.hardestThings = _selectedIndices.map((index) => _options[index]).toList();
                     Navigator.push(
                       context,
                       MaterialPageRoute(

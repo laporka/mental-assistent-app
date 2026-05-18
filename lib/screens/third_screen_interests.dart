@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import '../models/user_data.dart';
 import '../widgets/dynamic_glow_button.dart';
 import 'third_screen_name.dart';
 
@@ -158,6 +159,7 @@ class _AFifthScreenState extends State<AFifthScreen> {
                   text: 'Продовжити далі',
                   isActive: isActive,
                   onTap: () {
+                    UserData.interests = _selectedIndices.map((index) => _interests[index]).toList();
                     Navigator.push(
                       context,
                       MaterialPageRoute(

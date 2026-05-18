@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:test_app/models/user_data.dart';
 import 'fourth_screen_meet.dart';
 
 class ANameScreen extends StatefulWidget {
@@ -23,10 +24,11 @@ class _ANameScreenState extends State<ANameScreen> {
     final userName = value.trim(); 
     
     if (userName.isNotEmpty) {
+      UserData.userName = userName;
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ASixthScreen(name: userName), 
+          builder: (context) => ASixthScreen(), 
         ),
       );
     }
