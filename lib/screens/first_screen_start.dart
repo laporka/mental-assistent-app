@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:test_app/screens/first_screen_splash.dart';
 import 'dart:ui';
 import 'second_screen_hello.dart';
 

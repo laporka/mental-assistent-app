@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../widgets/dynamic_glow_button.dart';
-import 'fourth_screen_meet.dart';
+import 'third_screen_name.dart';
 
 class AFifthScreen extends StatefulWidget {
   const AFifthScreen({super.key});
@@ -120,7 +120,7 @@ class _AFifthScreenState extends State<AFifthScreen> {
                   style: TextStyle(
                     color: Color(0xFFF9FFFA),
                     fontSize: 24,
-                    fontFamily: 'TenorSans',
+                    fontFamily: 'Tenor Sans',
                     fontWeight: FontWeight.w400,
                     height: 1.1,
                   ),
@@ -161,7 +161,7 @@ class _AFifthScreenState extends State<AFifthScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ASixthScreen(name: 'Катя'),
+                        builder: (context) => const ANameScreen(),
                       ),
                     );
                   },
