@@ -1,5 +1,8 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/main_navigation_screen.dart';
 import 'first_screen_start.dart';
 
 class FirstScreenSplash extends StatefulWidget {
@@ -13,13 +16,46 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
+    _startAppLogic();
+  }
+
+  Future<void> _startAppLogic() async {
+    // Чекаємо фіксовані 2 секунди, щоб користувач побачив гарну заставку
+    await Future.delayed(const Duration(seconds: 2));
+
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (!mounted) return;
+
+    // СЦЕНАРІЙ 1: Користувач абсолютно новий — відправляємо на початок опитування
+    if (currentUser == null) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const FirstScreenStart()),
+      );
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('messages')
+          .limit(1)
+          .get();
+
+      if (!mounted) return;
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+      );
+    } catch (e) {
+      print('Помилка перевірки Firestore на сплеші: $e');
       if (mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const FirstScreenStart()),
+          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
         );
       }
-    });
+    }
   }
 
   @override
@@ -33,6 +69,7 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
         height: size.height,
         child: Stack(
           children: [
+            // Сяйво знизу екрана
             Positioned(
               bottom: -size.height * 0.15,
               left: -size.width * 0.2,
@@ -58,6 +95,7 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
               ),
             ),
 
+            // Текст по центру
             Positioned(
               top: size.height * 0.35,
               left: 0,
@@ -73,7 +111,7 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
                       fontSize: 40,
                       fontWeight: FontWeight.w400,
                       color: Color(0xFFFAFFFB),
-                      height: 1.1, 
+                      height: 1.1,
                     ),
                   ),
                 ),

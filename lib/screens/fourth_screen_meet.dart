@@ -1,10 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:test_app/screens/MainApp/empty_main_home_screen.dart';
 import '../widgets/loading_helper.dart';
-import 'fifth_screen_loading.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_data.dart';
+import '../widgets/save_user_to_firebase.dart';
 
 class ASixthScreen extends StatelessWidget {
 
@@ -91,12 +91,12 @@ class ASixthScreen extends StatelessWidget {
                   if (!context.mounted) return; 
 
                   LoadingHelper.hide(context);
-                  // Navigator.push(
-                    // context,
-                    // MaterialPageRoute(
-                      // builder: (context) => const FifthScreenLoading(),
-                    // ),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AHomeEmptyScreen(),
+                    ),
+                  );
                 },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -134,20 +134,19 @@ class ASixthScreen extends StatelessWidget {
   }
 }
 
-Future<void> saveUserToFirebase() async {
-  try {
-    final usersCollection = FirebaseFirestore.instance.collection('users');
+// Future<void> saveUserToFirebase() async {
+//   try {
+//     final usersCollection = FirebaseFirestore.instance.collection('users');
 
-    // Беремо дані прямо з нашого глобального класу UserData
-    await usersCollection.add({
-      'name': UserData.userName,
-      'hardest_things': UserData.hardestThings,
-      'interests': UserData.interests,
-      'created_at': FieldValue.serverTimestamp(),
-    });
+//     await usersCollection.add({
+//       'name': UserData.userName,
+//       'hardest_things': UserData.hardestThings,
+//       'interests': UserData.interests,
+//       'created_at': FieldValue.serverTimestamp(),
+//     });
 
-    print('Дані успішно збережено в Firebase! 🚀');
-  } catch (e) {
-    print('Помилка: $e');
-  }
-}
+//     print('Дані успішно збережено в Firebase! 🚀');
+//   } catch (e) {
+//     print('Помилка: $e');
+//   }
+// }
