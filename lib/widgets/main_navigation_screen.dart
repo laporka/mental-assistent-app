@@ -87,7 +87,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               children: [
                 _buildMenuButton(index: 0, iconPath: 'assets/icons/ic_round-home.svg'),
                 _buildMenuButton(index: 1, iconPath: 'assets/icons/ic_baseline-mode.svg'),
-                _buildCentralChatButton(), 
+                _buildMenuButton(index: 2, iconPath: 'assets/icons/ic_baseline-chat-bubble.svg'),
                 _buildMenuButton(index: 3, iconPath: 'assets/icons/ic_baseline-calendar-today.svg'),
                 _buildMenuButton(index: 4, iconPath: 'assets/icons/ic_sharp-person.svg'),
               ],
@@ -105,70 +105,34 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 42, 
-        height: 42,
-        decoration: isActive 
-            ? BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF91FFA4).withValues(alpha: 0.1),
-              )
-            : null,
-        child: Center(
-          child: isActive
-              ? ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF2BBCFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
-                  ).createShader(bounds),
-                  blendMode: BlendMode.srcIn,
-                  child: SvgPicture.asset(
-                    iconPath,
-                    width: 26,
-                    height: 26,
-                    colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                  ),
-                )
-              // --- ОНОВЛЕНИЙ НЕАКТИВНИЙ СТАН ---
-              // Прибрали Opacity, тепер іконки горять чистим білим на 100%
-              : SvgPicture.asset(
-                  iconPath,
-                  width: 24,
-                  height: 24,
-                  colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCentralChatButton() {
-    final bool isChatActive = _currentIndex == 2;
-
-    return GestureDetector(
-      onTap: () => setState(() => _currentIndex = 2),
-      child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            begin: Alignment(1.00, 0.00),
-            end: Alignment(0.00, 1.00),
-            colors: [Color(0xFF2BBCFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
-          ),
-          boxShadow: isChatActive ? [
-            BoxShadow(
-              color: const Color(0xFF91FFA4).withValues(alpha: 0.35),
-              blurRadius: 18,
-              spreadRadius: 1.5,
-            )
-          ] : null,
+          gradient: isActive
+              ? const LinearGradient(
+                  begin: Alignment(1.00, 0.00),
+                  end: Alignment(0.00, 1.00),
+                  colors: [Color(0xFF2BBCFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
+                )
+              : null,
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFF91FFA4).withValues(alpha: 0.35),
+                    blurRadius: 18,
+                    spreadRadius: 1.5,
+                  )
+                ]
+              : null,
         ),
         child: SvgPicture.asset(
-          'assets/icons/ic_baseline-chat-bubble.svg',
+          iconPath,
           width: 24,
           height: 24,
-          colorFilter: const ColorFilter.mode(Color(0xFF041219), BlendMode.srcIn),
+          colorFilter: ColorFilter.mode(
+            isActive ? const Color(0xFF041219) : Colors.white,
+            BlendMode.srcIn,
+          ),
         ),
       ),
     );
