@@ -2,12 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import '../screens/MainApp/diary_screen.dart';
 import '../screens/MainApp/empty_main_home_screen.dart';
 
-// Заглушки для вкладок
 class HomeScreenPlaceholder extends StatelessWidget { const HomeScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Головна Панель'))); }
-class DiaryScreenPlaceholder extends StatelessWidget { const DiaryScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Щоденник'))); }
 class CalendarScreenPlaceholder extends StatelessWidget { const CalendarScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Календар'))); }
 class ProfileScreenPlaceholder extends StatelessWidget { const ProfileScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Профіль'))); }
 
@@ -19,7 +17,7 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 2; // За замовчуванням відкритий чат
+  int _currentIndex = 2;
   late Future<QuerySnapshot> _checkMessagesFuture;
   final String? uid = FirebaseAuth.instance.currentUser?.uid;
 
@@ -58,7 +56,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
         final List<Widget> screens = [
           const HomeScreenPlaceholder(),
-          const DiaryScreenPlaceholder(),
+          const DiaryHomeScreen(),
           chatScreen,
           const CalendarScreenPlaceholder(),
           const ProfileScreenPlaceholder(),
