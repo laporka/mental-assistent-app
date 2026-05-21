@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'fifth_screen_loading.dart';
+import 'sixth_screen_diary.dart';
 
 class ASixthScreen extends StatelessWidget {
   final String name;
@@ -87,7 +87,7 @@ class ASixthScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const FifthScreenLoading(),
+                      builder: (context) => const SixthScreenDiary(),
                     ),
                   );
                 },
