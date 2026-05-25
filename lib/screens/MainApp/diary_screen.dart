@@ -1,12 +1,32 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'create_record_screen.dart';
 
-class DiaryHomeScreen extends StatelessWidget {
+class DiaryHomeScreen extends StatefulWidget {
   const DiaryHomeScreen({super.key});
 
   @override
+  State<DiaryHomeScreen> createState() => _DiaryHomeScreenState();
+}
+
+class _DiaryHomeScreenState extends State<DiaryHomeScreen> {
+  // Наш логічний перемикач станів
+  bool _isCreating = false; 
+
+  @override
   Widget build(BuildContext context) {
+    if (_isCreating) {
+      return CreateRecordScreen(
+        onCancel: () {
+          setState(() => _isCreating = false);
+        },
+        onSaveSuccess: () {
+          setState(() => _isCreating = false);
+        },
+      );
+    }
+
     final size = MediaQuery.of(context).size;
     final double scaleX = size.width / 360;
     final double scaleY = size.height / 800;
@@ -88,7 +108,7 @@ class DiaryHomeScreen extends StatelessWidget {
               child: TouchGlowButton(
                 text: 'Зробити перший запис',
                 onTap: () {
-                  // Твоя логіка переходу
+                  setState(() => _isCreating = true);
                 },
               ),
             ),
@@ -99,6 +119,7 @@ class DiaryHomeScreen extends StatelessWidget {
   }
 }
 
+// --- КЛАС КНОПКИ ЗАЛИШАЄТЬСЯ БЕЗ ЗМІН ---
 class TouchGlowButton extends StatefulWidget {
   final VoidCallback onTap;
   final String text;
@@ -150,16 +171,16 @@ class _TouchGlowButtonState extends State<TouchGlowButton> {
             borderRadius: BorderRadius.circular(48),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,        // Контейнер стиснеться строго під текст + відступи 48
-            mainAxisAlignment: MainAxisAlignment.center, // Текст буде чітко по центру кнопки
+            mainAxisSize: MainAxisSize.min,        
+            mainAxisAlignment: MainAxisAlignment.center, 
             children: [
               Text(
                 widget.text,
                 style: const TextStyle(
                   color: Color(0xFFF9FFFA),
-                  fontSize: 20,              // Твій 20 розмір
+                  fontSize: 20,              
                   fontFamily: 'Inter',
-                  fontWeight: FontWeight.w600, // Твоя товщина 600
+                  fontWeight: FontWeight.w600, 
                 ),
               ),
             ],

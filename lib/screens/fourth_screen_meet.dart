@@ -1,9 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:test_app/screens/MainApp/empty_main_home_screen.dart';
 import '../widgets/loading_helper.dart';
 import '../models/user_data.dart';
+import '../widgets/main_navigation_screen.dart';
 import '../widgets/save_user_to_firebase.dart';
 
 class ASixthScreen extends StatelessWidget {
@@ -94,7 +94,7 @@ class ASixthScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const AHomeEmptyScreen(),
+                      builder: (context) => MainNavigationScreen(),
                     ),
                   );
                 },
@@ -133,20 +133,3 @@ class ASixthScreen extends StatelessWidget {
     );
   }
 }
-
-// Future<void> saveUserToFirebase() async {
-//   try {
-//     final usersCollection = FirebaseFirestore.instance.collection('users');
-
-//     await usersCollection.add({
-//       'name': UserData.userName,
-//       'hardest_things': UserData.hardestThings,
-//       'interests': UserData.interests,
-//       'created_at': FieldValue.serverTimestamp(),
-//     });
-
-//     print('Дані успішно збережено в Firebase! 🚀');
-//   } catch (e) {
-//     print('Помилка: $e');
-//   }
-// }
