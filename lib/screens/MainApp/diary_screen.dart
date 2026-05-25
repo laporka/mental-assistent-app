@@ -1,7 +1,10 @@
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'create_record_screen.dart';
+import 'all_records_screen.dart';
 
 class DiaryHomeScreen extends StatefulWidget {
   const DiaryHomeScreen({super.key});
@@ -11,22 +14,50 @@ class DiaryHomeScreen extends StatefulWidget {
 }
 
 class _DiaryHomeScreenState extends State<DiaryHomeScreen> {
-  // Наш логічний перемикач станів
-  bool _isCreating = false; 
+
+  bool _isCreating = false;
 
   @override
   Widget build(BuildContext context) {
     if (_isCreating) {
       return CreateRecordScreen(
-        onCancel: () {
-          setState(() => _isCreating = false);
-        },
-        onSaveSuccess: () {
-          setState(() => _isCreating = false);
-        },
+        onCancel: () => setState(() => _isCreating = false),
+        onSaveSuccess: () => setState(() => _isCreating = false),
       );
     }
 
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+
+    if (uid == null) {
+      return const Center(child: Text("Помилка авторизації", style: TextStyle(color: Colors.white)));
+    }
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('diary')
+          .limit(1)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator(color: Color(0xFF2BBBFF)));
+        }
+
+        final hasRecords = snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+
+        if (hasRecords) {
+          return AllRecordsScreen(
+            onCreateNew: () => setState(() => _isCreating = true),
+          );
+        } else {
+          return _buildEmptyState(context);
+        }
+      },
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final double scaleX = size.width / 360;
     final double scaleY = size.height / 800;
@@ -119,7 +150,6 @@ class _DiaryHomeScreenState extends State<DiaryHomeScreen> {
   }
 }
 
-// --- КЛАС КНОПКИ ЗАЛИШАЄТЬСЯ БЕЗ ЗМІН ---
 class TouchGlowButton extends StatefulWidget {
   final VoidCallback onTap;
   final String text;

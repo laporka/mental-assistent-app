@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import '../models/diary_record_model.dart';
 import 'loading_helper.dart';
+import '../models/diary_record_model.dart';
 
 Future<bool> saveDiaryRecordToFirebase({
   required BuildContext context,

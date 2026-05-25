@@ -21,9 +21,8 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
   final TextEditingController _contentController = TextEditingController();
   final DateTime _currentDate = DateTime.now();
   
-  bool _isTagsVisible = false;
-  final List<String> _selectedTags = [];
-  
+  bool _isTagsVisible = false; 
+  final List<String> _selectedTags = []; 
   final List<String> _suggestedTags = ['Особисте', 'Робота', 'Ідея', 'Навчання']; 
 
   @override
@@ -76,7 +75,7 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
               if (newTag.isNotEmpty && !_suggestedTags.contains(newTag)) {
                 setState(() {
                   _suggestedTags.add(newTag);
-                  _selectedTags.add(newTag);
+                  _selectedTags.add(newTag); 
                 });
               }
               Navigator.pop(context);
@@ -182,7 +181,7 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                             GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  _isTagsVisible = !_isTagsVisible;
+                                  _isTagsVisible = !_isTagsVisible; 
                                 });
                               },
                               child: Container(
@@ -205,8 +204,8 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                         if (_isTagsVisible) ...[
                           const SizedBox(height: 12),
                           Wrap(
-                            spacing: 8.0,
-                            runSpacing: 8.0,
+                            spacing: 8.0, 
+                            runSpacing: 8.0, 
                             children: [
                               ..._suggestedTags.map((tag) {
                                 final isSelected = _selectedTags.contains(tag);
@@ -336,13 +335,17 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
             child: GestureDetector(
               onTap: widget.onCancel,
               child: Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF041219),
+                width: 72,
+                height: 72,
+                padding: const EdgeInsets.all(1.5),
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF2BBBFF), width: 1),
-                  boxShadow: const [
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF2BBBFF), Color(0xFF91FFA3), Color(0xFFFFCC00)],
+                  ),
+                  boxShadow: [
                     BoxShadow(
                       color: Color(0x3F041319),
                       blurRadius: 20,
@@ -350,25 +353,37 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                     )
                   ],
                 ),
-                child: const Center(
-                  child: Icon(Icons.close, color: Colors.white, size: 24),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF041219),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.close, color: Colors.white, size: 32),
+                  ),
                 ),
               ),
             ),
           ),
+
+          // Права кнопка — ЗБЕРЕГТИ
           Positioned(
             right: 15 * scaleX, 
             bottom: 20,        
             child: GestureDetector(
               onTap: _handleSave,
               child: Container(
-                width: 64,
-                height: 64,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF041219),
+                width: 72,
+                height: 72,
+                padding: const EdgeInsets.all(1.5),
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF2BBBFF), width: 1),
-                  boxShadow: const [
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF2BBBFF), Color(0xFF91FFA3), Color(0xFFFFCC00)],
+                  ),
+                  boxShadow: [
                     BoxShadow(
                       color: Color(0x3F041319),
                       blurRadius: 20,
@@ -376,8 +391,14 @@ class _CreateRecordScreenState extends State<CreateRecordScreen> {
                     )
                   ],
                 ),
-                child: const Center(
-                  child: Icon(Icons.check, color: Color(0xFF91FFA4), size: 24),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF041219),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.check, color: Color(0xFF91FFA4), size: 32),
+                  ),
                 ),
               ),
             ),

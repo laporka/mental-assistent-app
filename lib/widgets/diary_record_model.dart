@@ -19,6 +19,7 @@ class DiaryRecordModel {
     };
   }
 
+  // ДОДАЙ ЦЕЙ БЛОК: Метод для читання даних з Firebase
   factory DiaryRecordModel.fromMap(Map<String, dynamic> map) {
     return DiaryRecordModel(
       content: map['content'] ?? '',
