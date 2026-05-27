@@ -7,8 +7,13 @@ import '../../models/diary_record_model.dart';
 
 class AllRecordsScreen extends StatelessWidget {
   final VoidCallback onCreateNew;
+  final Function(DiaryRecordModel) onRecordTap;
 
-  const AllRecordsScreen({super.key, required this.onCreateNew});
+  const AllRecordsScreen({
+    super.key, 
+    required this.onCreateNew,
+    required this.onRecordTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -87,9 +92,12 @@ class AllRecordsScreen extends StatelessWidget {
                           final data = docs[index].data() as Map<String, dynamic>;
                           final record = DiaryRecordModel.fromMap(data);
 
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: _buildRecordCard(record),
+                          return GestureDetector(
+                            onTap: () => onRecordTap(record),
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: _buildRecordCard(record),
+                            ),
                           );
                         },
                       );
@@ -117,14 +125,14 @@ class AllRecordsScreen extends StatelessWidget {
           ),
 
           Positioned(
-            right: 20 * scaleX,
+            right: 20 * scaleX, 
             bottom: 30 * scaleY, 
             child: GestureDetector(
               onTap: onCreateNew,
               child: Container(
-                width: 72,
+                width: 72, 
                 height: 72,
-                padding: const EdgeInsets.all(1.5),
+                padding: const EdgeInsets.all(1.5), 
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -133,21 +141,16 @@ class AllRecordsScreen extends StatelessWidget {
                     colors: [Color(0xFF2BBBFF), Color(0xFF91FFA3), Color(0xFFFFCC00)],
                   ),
                   boxShadow: [
-                    BoxShadow(
-                      color: Color(0x3F041319),
-                      blurRadius: 20,
-                      offset: Offset(0, 2),
-                    )
+                    BoxShadow(color: Color(0x3F041319), blurRadius: 20, offset: Offset(0, 2))
                   ],
                 ),
                 child: Container(
-                  // Внутрішня заливка кнопки
                   decoration: const BoxDecoration(
                     color: Color(0xFF041219),
                     shape: BoxShape.circle,
                   ),
                   child: const Center(
-                    child: Icon(Icons.add, color: Colors.white, size: 32), // Збільшили іконку
+                    child: Icon(Icons.add, color: Colors.white, size: 32), 
                   ),
                 ),
               ),
@@ -218,6 +221,7 @@ class AllRecordsScreen extends StatelessWidget {
                   fontSize: 16,
                   fontFamily: 'Inter',
                   fontWeight: FontWeight.w400,
+                  height: 1.4,
                 ),
               ),
               

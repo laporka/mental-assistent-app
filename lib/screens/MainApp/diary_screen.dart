@@ -3,8 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../models/diary_record_model.dart';
 import 'create_record_screen.dart';
 import 'all_records_screen.dart';
+import 'view_record_screen.dart';
 
 class DiaryHomeScreen extends StatefulWidget {
   const DiaryHomeScreen({super.key});
@@ -14,11 +16,21 @@ class DiaryHomeScreen extends StatefulWidget {
 }
 
 class _DiaryHomeScreenState extends State<DiaryHomeScreen> {
-
   bool _isCreating = false;
+  DiaryRecordModel? _selectedRecord;
 
   @override
   Widget build(BuildContext context) {
+    if (_selectedRecord != null && !_isCreating) {
+      return ViewRecordScreen(
+        record: _selectedRecord!,
+        onBack: () => setState(() => _selectedRecord = null),
+        onEdit: () {
+          print("Перехід до редагування");
+        },
+      );
+    }
+
     if (_isCreating) {
       return CreateRecordScreen(
         onCancel: () => setState(() => _isCreating = false),
@@ -49,6 +61,9 @@ class _DiaryHomeScreenState extends State<DiaryHomeScreen> {
         if (hasRecords) {
           return AllRecordsScreen(
             onCreateNew: () => setState(() => _isCreating = true),
+            onRecordTap: (record) {
+              setState(() => _selectedRecord = record);
+            },
           );
         } else {
           return _buildEmptyState(context);
