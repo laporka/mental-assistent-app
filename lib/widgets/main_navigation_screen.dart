@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../screens/MainApp/diary_screen.dart';
 import '../screens/MainApp/empty_main_home_screen.dart';
+import '../screens/MainApp/calendar_screen.dart';
+
 
 class HomeScreenPlaceholder extends StatelessWidget { const HomeScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Головна Панель'))); }
-class CalendarScreenPlaceholder extends StatelessWidget { const CalendarScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Календар'))); }
 class ProfileScreenPlaceholder extends StatelessWidget { const ProfileScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Профіль'))); }
+
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -51,14 +53,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
 
         Widget chatScreen = const AHomeEmptyScreen();
         if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-          chatScreen = const Scaffold(body: Center(child: Text('Ви вже маєте чат!'))); // TODO: Сюди твій MainChatScreen()
+          chatScreen = const Scaffold(body: Center(child: Text('Ви вже маєте чат!')));
         }
 
         final List<Widget> screens = [
           const HomeScreenPlaceholder(),
           const DiaryHomeScreen(),
           chatScreen,
-          const CalendarScreenPlaceholder(),
+          const CalendarHomeScreen(),
           const ProfileScreenPlaceholder(),
         ];
 
