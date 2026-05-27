@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../models/diary_record_model.dart';
 import 'create_record_screen.dart';
 import 'all_records_screen.dart';
+import 'edit_record_screen.dart';
 import 'view_record_screen.dart';
 
 class DiaryHomeScreen extends StatefulWidget {
@@ -18,15 +19,32 @@ class DiaryHomeScreen extends StatefulWidget {
 class _DiaryHomeScreenState extends State<DiaryHomeScreen> {
   bool _isCreating = false;
   DiaryRecordModel? _selectedRecord;
+  DiaryRecordModel? _editingRecord;
 
   @override
   Widget build(BuildContext context) {
+    if (_editingRecord != null) {
+      return EditRecordScreen(
+        record: _editingRecord!,
+        onCancel: () => setState(() => _editingRecord = null),
+        onSaveSuccess: () {
+          setState(() {
+            _editingRecord = null;
+            _selectedRecord = null;
+          });
+        },
+      );
+    }
+
     if (_selectedRecord != null && !_isCreating) {
       return ViewRecordScreen(
         record: _selectedRecord!,
         onBack: () => setState(() => _selectedRecord = null),
         onEdit: () {
-          print("Перехід до редагування");
+          setState(() {
+            _editingRecord = _selectedRecord;
+            _selectedRecord = null;
+          });
         },
       );
     }
@@ -39,10 +57,6 @@ class _DiaryHomeScreenState extends State<DiaryHomeScreen> {
     }
 
     final String? uid = FirebaseAuth.instance.currentUser?.uid;
-
-    if (uid == null) {
-      return const Center(child: Text("Помилка авторизації", style: TextStyle(color: Colors.white)));
-    }
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance

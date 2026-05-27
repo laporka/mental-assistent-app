@@ -51,3 +51,50 @@ Future<bool> saveDiaryRecordToFirebase({
     return false;
   }
 }
+
+
+Future<bool> updateDiaryRecordInFirebase({
+  required BuildContext context,
+  required String docId,
+  required String content,
+  required List<String> tags,
+}) async {
+  
+  if (content.trim().isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Нотатка не може бути порожньою')),
+    );
+    return false;
+  }
+
+  final String? uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) return false;
+
+  LoadingHelper.show(context);
+
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('diary')
+        .doc(docId)
+        .update({
+      'content': content.trim(),
+      'tags': tags,
+    });
+
+    if (context.mounted) {
+      LoadingHelper.hide(context);
+    }
+    return true;
+    
+  } catch (e) {
+    if (context.mounted) {
+      LoadingHelper.hide(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Помилка оновлення: $e')),
+      );
+    }
+    return false;
+  }
+}

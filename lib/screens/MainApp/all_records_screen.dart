@@ -89,8 +89,7 @@ class AllRecordsScreen extends StatelessWidget {
                         ),
                         itemCount: docs.length,
                         itemBuilder: (context, index) {
-                          final data = docs[index].data() as Map<String, dynamic>;
-                          final record = DiaryRecordModel.fromMap(data);
+                          final record = DiaryRecordModel.fromFirestore(docs[index]);
 
                           return GestureDetector(
                             onTap: () => onRecordTap(record),
