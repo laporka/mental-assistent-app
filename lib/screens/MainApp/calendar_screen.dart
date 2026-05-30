@@ -2,10 +2,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../widgets/dynamic_glow_button.dart';
 import '../../widgets/loading_helper.dart';
+import '../../widgets/save_tracker.dart';
+import 'create_tracker_screen.dart';
 import 'goal_type_selection_screen.dart';
 
 
-// ТЕПЕР ЦЕ STATEFUL WIDGET
 class CalendarHomeScreen extends StatefulWidget {
   const CalendarHomeScreen({super.key});
 
@@ -14,23 +15,56 @@ class CalendarHomeScreen extends StatefulWidget {
 }
 
 class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
-  // Змінна стану: чи вибирає користувач зараз тип цілі?
   bool _isSelectingType = false;
+  bool _isCreatingTracker = false;
 
   @override
   Widget build(BuildContext context) {
+    // 1. СТАН СТВОРЕННЯ ТРЕКЕРА (Форма)
+    if (_isCreatingTracker) {
+      return CreateTrackerScreen(
+        onCancel: () {
+          setState(() {
+            _isCreatingTracker = false;
+          });
+        },
+        onCreate: (newTracker) async {
+          bool success = await saveTrackerToFirebase(
+            context: context,
+            tracker: newTracker,
+          );
+
+          // Якщо Firebase успішно зберіг дані, закриваємо форму і повертаємося до календаря
+          if (success && mounted) {
+            setState(() {
+              _isCreatingTracker = false;
+            });
+          }
+        },
+      );
+    }
+
     if (_isSelectingType) {
       return GoalTypeSelectionScreen(
         onCancel: () {
           setState(() => _isSelectingType = false);
         },
         onNext: (int selectedType) {
-          print('Вибрано тип (0-Ціль, 1-Трекер): $selectedType');
+          if (selectedType == 1) {
+            setState(() {
+              _isSelectingType = false;
+              _isCreatingTracker = true;
+            });
+          } else {
+            print("Тут буде перехід на створення Цілі");
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Створення цілі ще в розробці!')),
+            );
+          }
         },
       );
     }
 
-    // 2. ІНАКШЕ — ПОКАЗУЄМО СТАНДАРТНИЙ КАЛЕНДАР
     final size = MediaQuery.of(context).size;
     final double scaleX = size.width / 360;
     final double scaleY = size.height / 800;
@@ -105,7 +139,6 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
             ),
           ),
 
-          // Сам календар
           const Positioned(
             top: 120,
             left: 0,
@@ -113,7 +146,6 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
             child: _CalendarWidget(),
           ),
 
-          // Текст
           const Positioned(
             top: 340,
             left: 40,
@@ -130,7 +162,6 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
             ),
           ),
 
-          // Кнопка
           Positioned(
             bottom: 60,
             left: 0,
@@ -140,14 +171,12 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                 text: 'Створити першу ціль',
                 isActive: true,
                 onTap: () async {
-                  // Показуємо лоадер для красивого переходу
                   LoadingHelper.show(context);
 
                   await Future.delayed(const Duration(milliseconds: 500));
 
                   if (context.mounted) {
                     LoadingHelper.hide(context);
-                    // Перемикаємо екран!
                     setState(() {
                       _isSelectingType = true;
                     });
@@ -162,7 +191,6 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
   }
 }
 
-// --- КОД ВІДЖЕТА КАЛЕНДАРЯ ЗАЛИШАЄТЬСЯ БЕЗ ЗМІН ---
 class _CalendarWidget extends StatefulWidget {
   const _CalendarWidget();
 
