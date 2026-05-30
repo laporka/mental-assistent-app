@@ -2,13 +2,35 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../widgets/dynamic_glow_button.dart';
 import '../../widgets/loading_helper.dart';
+import 'goal_type_selection_screen.dart';
 
 
-class CalendarHomeScreen extends StatelessWidget {
+// ТЕПЕР ЦЕ STATEFUL WIDGET
+class CalendarHomeScreen extends StatefulWidget {
   const CalendarHomeScreen({super.key});
 
   @override
+  State<CalendarHomeScreen> createState() => _CalendarHomeScreenState();
+}
+
+class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
+  // Змінна стану: чи вибирає користувач зараз тип цілі?
+  bool _isSelectingType = false;
+
+  @override
   Widget build(BuildContext context) {
+    if (_isSelectingType) {
+      return GoalTypeSelectionScreen(
+        onCancel: () {
+          setState(() => _isSelectingType = false);
+        },
+        onNext: (int selectedType) {
+          print('Вибрано тип (0-Ціль, 1-Трекер): $selectedType');
+        },
+      );
+    }
+
+    // 2. ІНАКШЕ — ПОКАЗУЄМО СТАНДАРТНИЙ КАЛЕНДАР
     final size = MediaQuery.of(context).size;
     final double scaleX = size.width / 360;
     final double scaleY = size.height / 800;
@@ -19,6 +41,7 @@ class CalendarHomeScreen extends StatelessWidget {
       color: const Color(0xFF041219),
       child: Stack(
         children: [
+          // Фон
           Positioned(
             left: -(363 * scaleX - 50),
             top: -(577 * scaleY - 450),
@@ -33,11 +56,7 @@ class CalendarHomeScreen extends StatelessWidget {
                     gradient: LinearGradient(
                       begin: Alignment(0.19, -0.03),
                       end: Alignment(0.68, 0.81),
-                      colors: [
-                        Color(0xFFFFCC00),
-                        Color(0xFF91FFA4),
-                        Color(0xFF2BBCFF),
-                      ],
+                      colors: [Color(0xFFFFCC00), Color(0xFF91FFA4), Color(0xFF2BBCFF)],
                     ),
                     shape: OvalBorder(),
                   ),
@@ -46,6 +65,7 @@ class CalendarHomeScreen extends StatelessWidget {
             ),
           ),
 
+          // Заголовок
           Positioned(
             top: 60,
             left: 0,
@@ -85,18 +105,20 @@ class CalendarHomeScreen extends StatelessWidget {
             ),
           ),
 
-          Positioned(
+          // Сам календар
+          const Positioned(
             top: 120,
             left: 0,
             right: 0,
-            child: const _CalendarWidget(),
+            child: _CalendarWidget(),
           ),
 
-          Positioned(
+          // Текст
+          const Positioned(
             top: 340,
             left: 40,
             right: 40,
-            child: const Text(
+            child: Text(
               'Тут живе твій ритм\nПостав ціль і стеж за прогресом\nДодай нагадування щоб не забути',
               style: TextStyle(
                 color: Color(0xFFF9FFFA),
@@ -108,6 +130,7 @@ class CalendarHomeScreen extends StatelessWidget {
             ),
           ),
 
+          // Кнопка
           Positioned(
             bottom: 60,
             left: 0,
@@ -117,22 +140,17 @@ class CalendarHomeScreen extends StatelessWidget {
                 text: 'Створити першу ціль',
                 isActive: true,
                 onTap: () async {
+                  // Показуємо лоадер для красивого переходу
                   LoadingHelper.show(context);
 
-                  await Future.delayed(const Duration(milliseconds: 1500));
+                  await Future.delayed(const Duration(milliseconds: 500));
 
                   if (context.mounted) {
                     LoadingHelper.hide(context);
-                    
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Тут відкриється екран створення цілі!')),
-                    );
-                    
-                    // Коли екран буде готовий, розкоментуєш це:
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(builder: (context) => const GoalCreateScreen()),
-                    // );
+                    // Перемикаємо екран!
+                    setState(() {
+                      _isSelectingType = true;
+                    });
                   }
                 },
               ),
@@ -144,6 +162,7 @@ class CalendarHomeScreen extends StatelessWidget {
   }
 }
 
+// --- КОД ВІДЖЕТА КАЛЕНДАРЯ ЗАЛИШАЄТЬСЯ БЕЗ ЗМІН ---
 class _CalendarWidget extends StatefulWidget {
   const _CalendarWidget();
 
@@ -200,7 +219,6 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
       ),
       child: Column(
         children: [
-          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -242,10 +260,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
               ),
             ],
           ),
-
           const SizedBox(height: 12),
-
-          // Day name row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: _days
@@ -265,10 +280,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
                     ))
                 .toList(),
           ),
-
           const SizedBox(height: 4),
-
-          // Grid with slide+fade animation
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 280),
             transitionBuilder: (child, anim) {
@@ -283,8 +295,6 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
             },
             child: _buildGrid(days),
           ),
-
-          // Chevron down
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
@@ -336,9 +346,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
           child: Text(
             '${date.day}',
             style: TextStyle(
-              color: inMonth
-                  ? const Color(0xFFF9FFFA)
-                  : const Color(0xFF4A6670),
+              color: inMonth ? const Color(0xFFF9FFFA) : const Color(0xFF4A6670),
               fontSize: 16,
               fontFamily: 'Inter',
               fontWeight: FontWeight.w400,
