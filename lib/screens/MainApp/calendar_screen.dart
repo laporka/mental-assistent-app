@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import '../../widgets/dynamic_glow_button.dart';
 import '../../widgets/loading_helper.dart';
 import '../../widgets/save_tracker.dart';
+import '../../widgets/save_goal.dart';
 import 'create_tracker_screen.dart';
+import 'create_goal_screen.dart';
 import 'goal_type_selection_screen.dart';
-
 
 class CalendarHomeScreen extends StatefulWidget {
   const CalendarHomeScreen({super.key});
@@ -17,28 +18,36 @@ class CalendarHomeScreen extends StatefulWidget {
 class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
   bool _isSelectingType = false;
   bool _isCreatingTracker = false;
+  bool _isCreatingGoal = false;
+  bool _isCalendarExpanded = false;
 
   @override
   Widget build(BuildContext context) {
-    // 1. СТАН СТВОРЕННЯ ТРЕКЕРА (Форма)
     if (_isCreatingTracker) {
       return CreateTrackerScreen(
-        onCancel: () {
-          setState(() {
-            _isCreatingTracker = false;
-          });
-        },
+        onCancel: () => setState(() => _isCreatingTracker = false),
         onCreate: (newTracker) async {
           bool success = await saveTrackerToFirebase(
             context: context,
             tracker: newTracker,
           );
-
-          // Якщо Firebase успішно зберіг дані, закриваємо форму і повертаємося до календаря
           if (success && mounted) {
-            setState(() {
-              _isCreatingTracker = false;
-            });
+            setState(() => _isCreatingTracker = false);
+          }
+        },
+      );
+    }
+
+    if (_isCreatingGoal) {
+      return CreateGoalScreen(
+        onCancel: () => setState(() => _isCreatingGoal = false),
+        onCreate: (newGoal) async {
+          bool success = await saveGoalToFirebase(
+            context: context,
+            goal: newGoal,
+          );
+          if (success && mounted) {
+            setState(() => _isCreatingGoal = false);
           }
         },
       );
@@ -46,20 +55,18 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
 
     if (_isSelectingType) {
       return GoalTypeSelectionScreen(
-        onCancel: () {
-          setState(() => _isSelectingType = false);
-        },
+        onCancel: () => setState(() => _isSelectingType = false),
         onNext: (int selectedType) {
-          if (selectedType == 1) {
+          if (selectedType == 0) {
+            setState(() {
+              _isSelectingType = false;
+              _isCreatingGoal = true;
+            });
+          } else {
             setState(() {
               _isSelectingType = false;
               _isCreatingTracker = true;
             });
-          } else {
-            print("Тут буде перехід на створення Цілі");
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Створення цілі ще в розробці!')),
-            );
           }
         },
       );
@@ -75,7 +82,6 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
       color: const Color(0xFF041219),
       child: Stack(
         children: [
-          // Фон
           Positioned(
             left: -(363 * scaleX - 50),
             top: -(577 * scaleY - 450),
@@ -99,7 +105,6 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
             ),
           ),
 
-          // Заголовок
           Positioned(
             top: 60,
             left: 0,
@@ -139,25 +144,36 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
             ),
           ),
 
-          const Positioned(
+          Positioned(
             top: 120,
             left: 0,
             right: 0,
-            child: _CalendarWidget(),
+            child: _CalendarWidget(
+              isExpanded: _isCalendarExpanded,
+              onToggleExpand: () =>
+                  setState(() => _isCalendarExpanded = !_isCalendarExpanded),
+            ),
           ),
 
-          const Positioned(
+          Positioned(
             top: 340,
             left: 40,
             right: 40,
-            child: Text(
-              'Тут живе твій ритм\nПостав ціль і стеж за прогресом\nДодай нагадування щоб не забути',
-              style: TextStyle(
-                color: Color(0xFFF9FFFA),
-                fontSize: 28,
-                fontFamily: 'Tenor Sans',
-                fontWeight: FontWeight.w400,
-                height: 1.2,
+            child: AnimatedOpacity(
+              opacity: _isCalendarExpanded ? 0 : 1,
+              duration: const Duration(milliseconds: 200),
+              child: IgnorePointer(
+                ignoring: _isCalendarExpanded,
+                child: const Text(
+                  'Тут живе твій ритм\nПостав ціль і стеж за прогресом\nДодай нагадування щоб не забути',
+                  style: TextStyle(
+                    color: Color(0xFFF9FFFA),
+                    fontSize: 28,
+                    fontFamily: 'Tenor Sans',
+                    fontWeight: FontWeight.w400,
+                    height: 1.2,
+                  ),
+                ),
               ),
             ),
           ),
@@ -172,14 +188,10 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                 isActive: true,
                 onTap: () async {
                   LoadingHelper.show(context);
-
                   await Future.delayed(const Duration(milliseconds: 500));
-
                   if (context.mounted) {
                     LoadingHelper.hide(context);
-                    setState(() {
-                      _isSelectingType = true;
-                    });
+                    setState(() => _isSelectingType = true);
                   }
                 },
               ),
@@ -192,7 +204,13 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
 }
 
 class _CalendarWidget extends StatefulWidget {
-  const _CalendarWidget();
+  final bool isExpanded;
+  final VoidCallback onToggleExpand;
+
+  const _CalendarWidget({
+    required this.isExpanded,
+    required this.onToggleExpand,
+  });
 
   @override
   State<_CalendarWidget> createState() => _CalendarWidgetState();
@@ -200,6 +218,7 @@ class _CalendarWidget extends StatefulWidget {
 
 class _CalendarWidgetState extends State<_CalendarWidget> {
   late DateTime _weekStart;
+  late DateTime _monthStart;
   DateTime _selectedDate = DateTime.now();
   int _direction = 1;
 
@@ -214,31 +233,75 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    _weekStart = now.subtract(Duration(days: now.weekday - 1));
-    _weekStart = DateTime(_weekStart.year, _weekStart.month, _weekStart.day);
+    final ws = now.subtract(Duration(days: now.weekday - 1));
+    _weekStart = DateTime(ws.year, ws.month, ws.day);
+    _monthStart = DateTime(now.year, now.month, 1);
+  }
+
+  @override
+  void didUpdateWidget(_CalendarWidget old) {
+    super.didUpdateWidget(old);
+    if (!old.isExpanded && widget.isExpanded) {
+      // When expanding, sync month to the week currently shown
+      _monthStart = DateTime(_weekStart.year, _weekStart.month, 1);
+    }
   }
 
   void _prev() => setState(() {
         _direction = -1;
-        _weekStart = _weekStart.subtract(const Duration(days: 7));
+        if (widget.isExpanded) {
+          _monthStart = DateTime(_monthStart.year, _monthStart.month - 1, 1);
+        } else {
+          _weekStart = _weekStart.subtract(const Duration(days: 7));
+        }
       });
 
   void _next() => setState(() {
         _direction = 1;
-        _weekStart = _weekStart.add(const Duration(days: 7));
+        if (widget.isExpanded) {
+          _monthStart = DateTime(_monthStart.year, _monthStart.month + 1, 1);
+        } else {
+          _weekStart = _weekStart.add(const Duration(days: 7));
+        }
       });
 
-  List<DateTime> _buildDays() =>
+  List<DateTime> _buildWeekDays() =>
       List.generate(7, (i) => _weekStart.add(Duration(days: i)));
+
+  List<DateTime> _buildMonthDays() {
+    final firstDay = DateTime(_monthStart.year, _monthStart.month, 1);
+    final lastDay = DateTime(_monthStart.year, _monthStart.month + 1, 0);
+
+    final days = <DateTime>[];
+    // Pad from previous month
+    for (int i = firstDay.weekday - 1; i > 0; i--) {
+      days.add(firstDay.subtract(Duration(days: i)));
+    }
+    // Current month
+    for (int d = 1; d <= lastDay.day; d++) {
+      days.add(DateTime(_monthStart.year, _monthStart.month, d));
+    }
+    // Pad to fill last row
+    final target = days.length <= 35 ? 35 : 42;
+    int extra = 1;
+    while (days.length < target) {
+      days.add(lastDay.add(Duration(days: extra++)));
+    }
+    return days;
+  }
 
   bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
+  bool _isToday(DateTime d) => _isSameDay(d, DateTime.now());
+
   @override
   Widget build(BuildContext context) {
-    final days = _buildDays();
+    final displayMonth = widget.isExpanded ? _monthStart : _weekStart;
 
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
       margin: const EdgeInsets.symmetric(horizontal: 24),
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       decoration: BoxDecoration(
@@ -247,6 +310,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
       ),
       child: Column(
         children: [
+          // Header row: < Month / Year >
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -260,7 +324,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
               Column(
                 children: [
                   Text(
-                    _months[_weekStart.month - 1],
+                    _months[displayMonth.month - 1],
                     style: const TextStyle(
                       color: Color(0xFFF9FFFA),
                       fontSize: 18,
@@ -269,7 +333,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
                     ),
                   ),
                   Text(
-                    '${_weekStart.year}',
+                    '${displayMonth.year}',
                     style: const TextStyle(
                       color: Color(0xFFF9FFFA),
                       fontSize: 13,
@@ -288,7 +352,10 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
               ),
             ],
           ),
+
           const SizedBox(height: 12),
+
+          // Day-name row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: _days
@@ -308,7 +375,9 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
                     ))
                 .toList(),
           ),
+
           const SizedBox(height: 4),
+
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 280),
             transitionBuilder: (child, anim) {
@@ -321,18 +390,30 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
                 child: FadeTransition(opacity: anim, child: child),
               );
             },
-            child: _buildGrid(days),
+            child: widget.isExpanded
+                ? _buildGrid(_buildMonthDays(),
+                    key: ValueKey('month-$_monthStart'),
+                    inMonthCheck: (d) => d.month == _monthStart.month)
+                : _buildGrid(_buildWeekDays(),
+                    key: ValueKey('week-$_weekStart'),
+                    inMonthCheck: (d) => d.month == _weekStart.month),
           ),
+
+          // Expand / collapse arrow
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: GestureDetector(
-                onTap: () {},
-                child: const Icon(
-                  Icons.keyboard_arrow_down_rounded,
-                  color: Color(0xFFF9FFFA),
-                  size: 24,
+                onTap: widget.onToggleExpand,
+                child: AnimatedRotation(
+                  turns: widget.isExpanded ? 0.5 : 0,
+                  duration: const Duration(milliseconds: 300),
+                  child: const Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: Color(0xFFF9FFFA),
+                    size: 24,
+                  ),
                 ),
               ),
             ),
@@ -342,20 +423,28 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
     );
   }
 
-  Widget _buildGrid(List<DateTime> days) {
+  Widget _buildGrid(
+    List<DateTime> days, {
+    required Key key,
+    required bool Function(DateTime) inMonthCheck,
+  }) {
     final rows = <Widget>[];
     for (int r = 0; r < days.length ~/ 7; r++) {
       rows.add(Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(7, (c) => _buildCell(days[r * 7 + c])),
+        children: List.generate(
+          7,
+          (c) => _buildCell(days[r * 7 + c], inMonth: inMonthCheck(days[r * 7 + c])),
+        ),
       ));
     }
-    return Column(key: ValueKey(_weekStart), children: rows);
+    return Column(key: key, children: rows);
   }
 
-  Widget _buildCell(DateTime date) {
-    final inMonth = date.month == _weekStart.month;
+  Widget _buildCell(DateTime date, {required bool inMonth}) {
     final selected = _isSameDay(date, _selectedDate);
+    final today = _isToday(date);
+    final highlighted = selected || today;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedDate = date),
@@ -363,7 +452,7 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
         width: 36,
         height: 36,
         margin: const EdgeInsets.symmetric(vertical: 2),
-        decoration: selected
+        decoration: highlighted
             ? BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 color: const Color(0xFF1A3D2B),
