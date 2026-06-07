@@ -24,162 +24,180 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
     final double scaleX = size.width / 360;
     final double scaleY = size.height / 800;
 
-    return Container(
-      width: size.width,
-      height: size.height,
-      color: const Color(0xFF041219),
-      child: Stack(
-        children: [
-          Positioned(
-            left: -17 * scaleX,
-            top: -193 * scaleY,
-            child: Opacity(
-              opacity: 0.20,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 90.0, sigmaY: 90.0),
-                child: Container(
-                  width: 393 * scaleX,
-                  height: 568 * scaleY,
-                  decoration: const ShapeDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment(0.60, 0.83),
-                      end: Alignment(0.00, 0.18),
-                      colors: [Color(0xFF2BBCFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
+    return Scaffold(
+      backgroundColor: const Color(0xFF041219),
+      body: Container(
+        width: size.width,
+        height: size.height,
+        color: const Color(0xFF041219),
+        child: Stack(
+          children: [
+            // 1. ФОНОВИЙ БЛІК (Залишаємо як є, він декоративний)
+            Positioned(
+              left: -17 * scaleX,
+              top: -193 * scaleY,
+              child: Opacity(
+                opacity: 0.20,
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 90.0, sigmaY: 90.0),
+                  child: Container(
+                    width: 393 * scaleX,
+                    height: 568 * scaleY,
+                    decoration: const ShapeDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment(0.60, 0.83),
+                        end: Alignment(0.00, 0.18),
+                        colors: [Color(0xFF2BBCFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
+                      ),
+                      shape: OvalBorder(),
                     ),
-                    shape: OvalBorder(),
                   ),
                 ),
               ),
             ),
-          ),
 
-          // 2. ЗАГОЛОВКИ
-          Positioned(
-            top: 100 * scaleY,
-            left: 40 * scaleX,
-            right: 40 * scaleX,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Що хочеш додати?',
-                  style: TextStyle(
-                    color: Color(0xFFF9FFFA),
-                    fontSize: 32,
-                    fontFamily: 'Tenor Sans',
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Обери тип — форма буде різною',
-                  style: TextStyle(
-                    color: const Color(0xFFF9FFFA).withOpacity(0.7),
-                    fontSize: 16,
-                    fontFamily: 'Inter',
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
-            ),
-          ),
+            // 2. БЕЗПЕЧНИЙ АДАПТИВНИЙ КОНТЕНТ (Замість купи Positioned)
+            Positioned.fill(
+              child: SafeArea(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight, // Розтягує на весь екран
+                        ),
+                        child: IntrinsicHeight(
+                          child: Padding(
+                            // Використовуємо фіксовані надійні відступи від країв екрана
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 20),
+                                
+                                // ЗАГОЛОВКИ
+                                const Text(
+                                  'Що хочеш додати?',
+                                  style: TextStyle(
+                                    color: Color(0xFFF9FFFA),
+                                    fontSize: 32,
+                                    fontFamily: 'Tenor Sans',
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Обери тип — форма буде різною',
+                                  style: TextStyle(
+                                    color: const Color(0xFFF9FFFA).withOpacity(0.7),
+                                    fontSize: 16,
+                                    fontFamily: 'Inter',
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                
+                                const SizedBox(height: 40),
 
-          // 3. КАРТКИ ВИБОРУ
-          Positioned(
-            top: 210 * scaleY,
-            left: 40 * scaleX,
-            right: 40 * scaleX,
-            child: Column(
-              children: [
-                _buildSelectionCard(
-                  index: 0,
-                  icon: Icons.track_changes_rounded,
-                  title: 'Ціль',
-                  subtitle1: 'Намір з прогресом і дедлайном',
-                  subtitle2: 'Бігати, читати, вчитися',
-                ),
-                const SizedBox(height: 24),
-                _buildSelectionCard(
-                  index: 1,
-                  icon: Icons.notifications_active_outlined,
-                  title: 'Трекер',
-                  subtitle1: 'Регулярна дія без фінішу',
-                  subtitle2: 'Ліки, вода, вітаміни',
-                ),
-              ],
-            ),
-          ),
+                                // КАРТКИ ВИБОРУ
+                                _buildSelectionCard(
+                                  index: 0,
+                                  icon: Icons.track_changes_rounded,
+                                  title: 'Ціль',
+                                  subtitle1: 'Намір з прогресом і дедлайном',
+                                  subtitle2: 'Бігати, читати, вчитися',
+                                ),
+                                const SizedBox(height: 20),
+                                _buildSelectionCard(
+                                  index: 1,
+                                  icon: Icons.notifications_active_outlined,
+                                  title: 'Трекер',
+                                  subtitle1: 'Регулярна дія без фінішу',
+                                  subtitle2: 'Ліки, вода, вітаміни',
+                                ),
 
-          Positioned(
-            bottom: 60,
-            left: 40 * scaleX,
-            right: 40 * scaleX,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Кнопка Скасувати
-                Expanded(
-                  child: GestureDetector(
-                    onTap: widget.onCancel,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFFF9FFFA).withOpacity(0.6), width: 1),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        'Скасувати',
-                        style: TextStyle(
-                          color: Color(0xFFF9FFFA),
-                          fontSize: 18,
-                          fontFamily: 'Inter',
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                
-                // Кнопка Далі (з градієнтною рамкою)
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => widget.onNext(_selectedIndex),
-                    child: Container(
-                      padding: const EdgeInsets.only(left: 1.5, bottom: 1.5, top: 1, right: 1),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topRight,
-                          end: Alignment.bottomLeft,
-                          colors: [Color(0xFF2BBBFF), Color(0xFF91FFA3), Color(0xFFFFCC00)],
-                        ),
-                      ),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF041219),
-                          borderRadius: BorderRadius.circular(49),
-                        ),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Далі',
-                          style: TextStyle(
-                            color: Color(0xFFF9FFFA), 
-                            fontSize: 18,
-                            fontFamily: 'Inter',
-                            fontWeight: FontWeight.w600,
+                                // Пружина, яка штовхає кнопки до самого низу екрана
+                                const Spacer(),
+                                const SizedBox(height: 32),
+
+                                // НИЖНІ КНОПКИ
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    // Кнопка Скасувати
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: widget.onCancel,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 16),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(color: const Color(0xFFF9FFFA).withOpacity(0.6), width: 1),
+                                            borderRadius: BorderRadius.circular(50),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: const Text(
+                                            'Скасувати',
+                                            style: TextStyle(
+                                              color: Color(0xFFF9FFFA),
+                                              fontSize: 18,
+                                              fontFamily: 'Inter',
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 16),
+                                    
+                                    // Кнопка Далі
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => widget.onNext(_selectedIndex),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(1.5),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(50),
+                                            gradient: const LinearGradient(
+                                              begin: Alignment.topRight,
+                                              end: Alignment.bottomLeft,
+                                              colors: [Color(0xFF2BBBFF), Color(0xFF91FFA3), Color(0xFFFFCC00)],
+                                            ),
+                                          ),
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(vertical: 16),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF041219),
+                                              borderRadius: BorderRadius.circular(49),
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: const Text(
+                                              'Далі',
+                                              style: TextStyle(
+                                                color: Color(0xFFF9FFFA), 
+                                                fontSize: 18,
+                                                fontFamily: 'Inter',
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -194,15 +212,10 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
     final bool isSelected = _selectedIndex == index;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
+      onTap: () => setState(() => _selectedIndex = index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
-        // Градієнтна рамка
         padding: EdgeInsets.only(
           left: isSelected ? 1.5 : 1.0, 
           bottom: isSelected ? 1.5 : 1.0,
@@ -230,7 +243,6 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(19),
-              // Легка градієнтна заливка фону для вибраного стану
               gradient: isSelected
                   ? LinearGradient(
                       begin: Alignment.topLeft,
@@ -246,27 +258,21 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Іконка (змінюється на галочку, якщо вибрано)
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
-                  child: Container(
-                    key: ValueKey<bool>(isSelected),
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected ? const Color(0xFF91FFA3) : const Color(0xFF333F44),
-                        width: 1.5,
-                      ),
-                      color: isSelected ? const Color(0x1991FFA3) : Colors.transparent,
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected ? const Color(0xFF91FFA3) : const Color(0xFF333F44),
+                      width: 1.5,
                     ),
-                    child: Icon(
-                      isSelected ? Icons.check : icon, // Зміна іконки
-                      color: isSelected ? const Color(0xFF91FFA3) : const Color(0xFFBCC4C2),
-                      size: 24,
-                    ),
+                    color: isSelected ? const Color(0x1991FFA3) : Colors.transparent,
+                  ),
+                  child: Icon(
+                    isSelected ? Icons.check : icon, 
+                    color: isSelected ? const Color(0xFF91FFA3) : const Color(0xFFBCC4C2),
+                    size: 24,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -278,6 +284,8 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
                     children: [
                       Text(
                         title,
+                        // ЗАХИСТ ВІД СИСТЕМНОГО ЗБІЛЬШЕННЯ ШРИФТІВ
+                        textScaler: TextScaler.noScaling, 
                         style: const TextStyle(
                           color: Color(0xFFF9FFFA),
                           fontSize: 22,
@@ -288,6 +296,7 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
                       const SizedBox(height: 8),
                       Text(
                         subtitle1,
+                        textScaler: TextScaler.noScaling, // ЗАХИСТ
                         style: const TextStyle(
                           color: Color(0xFFF9FFFA),
                           fontSize: 14,
@@ -299,6 +308,7 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
                       const SizedBox(height: 6),
                       Text(
                         subtitle2,
+                        textScaler: TextScaler.noScaling, // ЗАХИСТ
                         style: TextStyle(
                           color: const Color(0xFFF9FFFA).withOpacity(0.5),
                           fontSize: 12,
