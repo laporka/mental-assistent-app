@@ -26,7 +26,6 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
 
     if (!mounted) return;
 
-    // СЦЕНАРІЙ 1: Користувач не авторизований
     if (currentUser == null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const FirstScreenStart()),
@@ -80,7 +79,6 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
               ),
             ),
 
-            // Текст по центру
             Positioned(
               top: size.height * 0.35,
               left: 0,

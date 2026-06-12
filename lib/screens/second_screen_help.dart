@@ -10,90 +10,86 @@ class ASecondScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     
-    // Коефіцієнти для адаптивності на основі макета 360x800
     final double scaleX = size.width / 360;
     final double scaleY = size.height / 800;
 
     return Scaffold(
       backgroundColor: const Color(0xFF041219),
-      body: Stack(
-        children: [
-          // --- 1. СЯЙВО (З новими координатами градієнта) ---
-          Positioned(
-            left: -17 * scaleX,
-            top: -416 * scaleY,
-            child: ImageFiltered(
-              // Зберігаємо наше ідеальне розмиття
-              imageFilter: ImageFilter.blur(sigmaX: 120.0, sigmaY: 120.0),
-              child: Container(
-                width: 393 * scaleX,
-                height: 577 * scaleY,
-                decoration: const ShapeDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment(0.19, 0.81),
-                    end: Alignment(1.37, 0.66), // Оновлено з твого коду
-                    colors: [
-                      Color(0xFF2BBBFF), 
-                      Color(0xFF91FFA3), 
-                      Color(0xFFFFCC00)
-                    ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AThirdScreen(),
+            ),
+          );
+        },
+        child: Stack(
+          children: [
+            Positioned(
+              left: -17 * scaleX,
+              top: -416 * scaleY,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 120.0, sigmaY: 120.0),
+                child: Container(
+                  width: 393 * scaleX,
+                  height: 577 * scaleY,
+                  decoration: const ShapeDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment(0.19, 0.81),
+                      end: Alignment(1.37, 0.66),
+                      colors: [
+                        Color(0xFF2BBBFF), 
+                        Color(0xFF91FFA3), 
+                        Color(0xFFFFCC00)
+                      ],
+                    ),
+                    shape: OvalBorder(),
                   ),
-                  shape: OvalBorder(),
                 ),
               ),
             ),
-          ),
 
-          // --- 2. ТЕКСТОВИЙ БЛОК ---
-          Positioned(
-            left: 40,
-            top: 100 * scaleY, 
-            child: SizedBox(
-              width: 281 * scaleX, // Обмежуємо ширину, щоб текст гарно переносився
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Я тут, щоб бути поруч', // Трохи підчистив зайвий пробіл в кінці
-                    style: TextStyle(
-                      color: Color(0xFFF9FFFA),
-                      fontSize: 24,
-                      fontFamily: 'Tenor Sans',
-                      fontWeight: FontWeight.w400,
-                      height: 1,
+            Positioned(
+              left: 40,
+              top: 100 * scaleY, 
+              child: SizedBox(
+                width: 281 * scaleX,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Я тут, щоб бути поруч',
+                      style: TextStyle(
+                        color: Color(0xFFF9FFFA),
+                        fontSize: 24,
+                        fontFamily: 'Tenor Sans',
+                        fontWeight: FontWeight.w400,
+                        height: 1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 12), // Трохи збільшив відступ між заголовком і текстом
-                  const Text(
-                    '— особливо коли важко зібрати думки або не хочеться нікому дзвонити',
-                    style: TextStyle(
-                      color: Color(0xFFC9D0CE),
-                      fontSize: 16,
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w400,
-                      height: 1.3, // Трохи більше повітря між рядками
+                    const SizedBox(height: 12),
+                    const Text(
+                      '— особливо коли важко зібрати думки або не хочеться нікому дзвонити',
+                      style: TextStyle(
+                        color: Color(0xFFC9D0CE),
+                        fontSize: 16,
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.w400,
+                        height: 1.3,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // --- 3. КНОПКА З ВІДБИТКОМ ---
-          Positioned(
-            bottom: 60,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AThirdScreen(),
-                    ),
-                  );
-                },
+            Positioned(
+              bottom: 60,
+              left: 0,
+              right: 0,
+              child: Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -123,8 +119,8 @@ class ASecondScreen extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

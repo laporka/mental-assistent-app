@@ -11,76 +11,76 @@ class FirstScreenStart extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFF041219),
-      body: SizedBox(
-        width: size.width,
-        height: size.height,
-        child: Stack(
-          children: [
-            Positioned(
-              bottom: -size.height * 0.15,
-              left: -size.width * 0.2,
-              right: -size.width * 0.2,
-              child: ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 120, sigmaY: 120),
-                child: Container(
-                  height: size.height * 0.65,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      begin: Alignment(-0.6, 1.0),
-                      end: Alignment(0.4, -1.0),
-                      colors: [
-                        Color(0xFF2BBCFF),
-                        Color(0xFF91FFA4),
-                        Color(0xFFFFCC00),
-                      ],
-                      stops: [0.19, 0.55, 0.90],
-                    ),
-                  ),
-                ),
-              ),
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AFirstScreen(),
             ),
-
-            Positioned(
-              top: size.height * 0.35,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: SizedBox(
-                  width: 280,
-                  child: const Text(
-                    'Iris\nМентальний\nАсистент',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontFamily: 'Tenor Sans',
-                      fontSize: 40,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFFFAFFFB),
-                      height: 1.1, 
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            Positioned(
-              bottom: 60,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AFirstScreen(),
+          );
+        },
+        child: SizedBox(
+          width: size.width,
+          height: size.height,
+          child: Stack(
+            children: [
+              Positioned(
+                bottom: -size.height * 0.15,
+                left: -size.width * 0.2,
+                right: -size.width * 0.2,
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 120, sigmaY: 120),
+                  child: Container(
+                    height: size.height * 0.65,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment(-0.6, 1.0),
+                        end: Alignment(0.4, -1.0),
+                        colors: [
+                          Color(0xFF2BBCFF),
+                          Color(0xFF91FFA4),
+                          Color(0xFFFFCC00),
+                        ],
+                        stops: [0.19, 0.55, 0.90],
                       ),
-                    );
-                  },
+                    ),
+                  ),
+                ),
+              ),
+
+              Positioned(
+                top: size.height * 0.35,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: SizedBox(
+                    width: 280,
+                    child: const Text(
+                      'Iris\nМентальний\nАсистент',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontFamily: 'Tenor Sans',
+                        fontSize: 40,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFFFAFFFB),
+                        height: 1.1, 
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              Positioned(
+                bottom: 60,
+                left: 0,
+                right: 0,
+                child: Center(
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Gradient copy — 1px right + 1px down
                       Transform.translate(
                         offset: const Offset(1, 1),
                         child: Container(
@@ -109,7 +109,6 @@ class FirstScreenStart extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // Main button
                       Container(
                         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 64),
                         decoration: BoxDecoration(
@@ -130,8 +129,8 @@ class FirstScreenStart extends StatelessWidget {
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
