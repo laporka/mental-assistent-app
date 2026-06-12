@@ -1,20 +1,16 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall } = require("firebase-functions/v2/https");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const logger = require("firebase-functions/logger");
 
-const API_KEY = process.env.GEMINI_API_KEY;
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 exports.chatWithMentalCoach = onCall(async (request) => {
-    if (!request.auth) {
-        throw new HttpsError("unauthenticated", "Тільки авторизовані користувачі можуть писати коучу.");
-    }
-
-    const userMessage = request.data.text; 
-    const chatHistory = request.data.history || [];
-
     try {
-        const genAI = new GoogleGenerativeAI(API_KEY);
+        const userText = request.data.text;
+        const history = request.data.history || [];
+
         const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash", 
             systemInstruction: `Ти — професійний ментал-коуч та персональний ментор у мобільному додатку ByteForge для трекінгу звичок та цілей. Твоя місія — допомагати користувачеві знаходити внутрішню мотивацію, дисципліну та баланс у житті. 
             Правила поведінки:
             1. Спілкуйся виключно українською мовою. Твій тон має бути емпатичним, підтримуючим, але водночас професійним і структурованим.
@@ -23,19 +19,22 @@ exports.chatWithMentalCoach = onCall(async (request) => {
             4. Критично важливо: Ти НЕ є медичним працівником чи психотерапевтом. Якщо користувач пише про депресію чи просить медичні поради — ввічливо відмов та порадь звернутися до лікаря.`,
         });
 
+        const formattedHistory = history.map(item => ({
+            role: item.role === "user" ? "user" : "model",
+            parts: [{ text: item.parts[0].text }]
+        }));
+
         const chat = model.startChat({
-            history: chatHistory,
+            history: formattedHistory,
         });
 
-        const result = await chat.sendMessage(userMessage);
+        const result = await chat.sendMessage(userText);
         const responseText = result.response.text();
 
-        return { 
-            response: responseText 
-        };
+        return { response: responseText };
 
     } catch (error) {
-        console.error("Помилка генерації AI:", error);
-        throw new HttpsError("internal", "Не вдалося отримати відповідь від AI.");
+        logger.error("Помилка AI:", error);
+        throw new Error("Не вдалося отримати відповідь від AI. Спробуй ще раз.");
     }
 });

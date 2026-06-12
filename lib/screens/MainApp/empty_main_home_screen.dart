@@ -1,11 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../widgets/loading_helper.dart';
 
 class AHomeEmptyScreen extends StatefulWidget {
-  const AHomeEmptyScreen({super.key});
+  final Function(String) onSendFirstMessage;
+
+  const AHomeEmptyScreen({super.key, required this.onSendFirstMessage});
 
   @override
   State<AHomeEmptyScreen> createState() => _AHomeEmptyScreenState();
@@ -20,40 +19,13 @@ class _AHomeEmptyScreenState extends State<AHomeEmptyScreen> {
     super.dispose();
   }
 
-  Future<void> _handleFirstMessage(String text) async {
+  void _handleFirstMessage(String text) {
     final messageText = text.trim();
     if (messageText.isEmpty) return;
 
-    LoadingHelper.show(context);
-
-    try {
-      final String? uid = FirebaseAuth.instance.currentUser?.uid;
-
-      if (uid != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('messages')
-            .add({
-          'text': messageText,
-          'sender': 'user',
-          'timestamp': FieldValue.serverTimestamp(),
-        });
-
-        print('Перше повідомлення вічного чату збережено! 🚀');
-        _messageController.clear();
-
-        if (!context.mounted) return;
-        LoadingHelper.hide(context);
-
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const Scaffold(body: Center(child: Text('Ви вже маєте чат!')))), // Потім заміниш на свій MainChatScreen()
-        );
-      }
-    } catch (e) {
-      print('Помилка відправки першого повідомлення: $e');
-      if (context.mounted) LoadingHelper.hide(context);
-    }
+    widget.onSendFirstMessage(messageText); 
+    
+    _messageController.clear();
   }
 
   @override
@@ -66,6 +38,7 @@ class _AHomeEmptyScreenState extends State<AHomeEmptyScreen> {
       backgroundColor: const Color(0xFF041219),
       body: Stack(
         children: [
+          // ФОНОВИЙ БЛЮР-ГРАДІЄНТ
           Positioned(
             left: -17 * scaleX,
             top: -269 * scaleY,
@@ -154,7 +127,7 @@ class _AHomeEmptyScreenState extends State<AHomeEmptyScreen> {
                         border: InputBorder.none,
                         focusedBorder: InputBorder.none,
                         enabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero, // Прибирає внутрішній зсув тексту
+                        contentPadding: EdgeInsets.zero,
                         suffixIcon: Icon(
                           Icons.edit_outlined,
                           color: Color(0xFFBCC4C2),

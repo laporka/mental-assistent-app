@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/main_navigation_screen.dart';
 import 'first_screen_start.dart';
 
@@ -20,14 +19,14 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
   }
 
   Future<void> _startAppLogic() async {
-    // Чекаємо фіксовані 2 секунди, щоб користувач побачив гарну заставку
+    // Чекаємо фіксовані 2 секунди для красивої заставки
     await Future.delayed(const Duration(seconds: 2));
 
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (!mounted) return;
 
-    // СЦЕНАРІЙ 1: Користувач абсолютно новий — відправляємо на початок опитування
+    // СЦЕНАРІЙ 1: Користувач не авторизований
     if (currentUser == null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const FirstScreenStart()),
@@ -35,28 +34,15 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
       return;
     }
 
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .collection('messages')
-          .limit(1)
-          .get();
-
-      if (!mounted) return;
-
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-      );
-    } catch (e) {
-      print('Помилка перевірки Firestore на сплеші: $e');
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
-        );
-      }
-    }
-  }
+    // СЦЕНАРІЙ 2: Користувач авторизований, йдемо в головне меню
+    // (Нам не обов'язково перевіряти базу на сплеші, 
+    // бо ChatTabWrapper всередині MainNavigationScreen 
+    // сам чудово впорається з перевіркою колекції 'coach_chat')
+    
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const MainNavigationScreen()),
+    );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +55,6 @@ class _FirstScreenSplashState extends State<FirstScreenSplash> {
         height: size.height,
         child: Stack(
           children: [
-            // Сяйво знизу екрана
             Positioned(
               bottom: -size.height * 0.15,
               left: -size.width * 0.2,
