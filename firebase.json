@@ -1,1 +1,37 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"lapork","appId":"1:830894456248:android:0d45309bb0f4cbc595e34d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"lapork","configurations":{"android":"1:830894456248:android:0d45309bb0f4cbc595e34d","web":"1:830894456248:web:bf69bb16b5d9d0fd95e34d","windows":"1:830894456248:web:0022776512f0e72a95e34d"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "lapork",
+          "appId": "1:830894456248:android:0d45309bb0f4cbc595e34d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "lapork",
+          "configurations": {
+            "android": "1:830894456248:android:0d45309bb0f4cbc595e34d",
+            "web": "1:830894456248:web:bf69bb16b5d9d0fd95e34d",
+            "windows": "1:830894456248:web:0022776512f0e72a95e34d"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}

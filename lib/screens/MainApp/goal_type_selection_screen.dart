@@ -32,7 +32,6 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
         color: const Color(0xFF041219),
         child: Stack(
           children: [
-            // 1. ФОНОВИЙ БЛІК (Залишаємо як є, він декоративний)
             Positioned(
               left: -17 * scaleX,
               top: -193 * scaleY,
@@ -56,7 +55,6 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
               ),
             ),
 
-            // 2. БЕЗПЕЧНИЙ АДАПТИВНИЙ КОНТЕНТ (Замість купи Positioned)
             Positioned.fill(
               child: SafeArea(
                 child: LayoutBuilder(
@@ -99,7 +97,6 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
                                 
                                 const SizedBox(height: 40),
 
-                                // КАРТКИ ВИБОРУ
                                 _buildSelectionCard(
                                   index: 0,
                                   icon: Icons.track_changes_rounded,
@@ -115,16 +112,12 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
                                   subtitle1: 'Регулярна дія без фінішу',
                                   subtitle2: 'Ліки, вода, вітаміни',
                                 ),
-
-                                // Пружина, яка штовхає кнопки до самого низу екрана
                                 const Spacer(),
                                 const SizedBox(height: 32),
 
-                                // НИЖНІ КНОПКИ
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // Кнопка Скасувати
                                     Expanded(
                                       child: GestureDetector(
                                         onTap: widget.onCancel,
@@ -149,7 +142,6 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
                                     ),
                                     const SizedBox(width: 16),
                                     
-                                    // Кнопка Далі
                                     Expanded(
                                       child: GestureDetector(
                                         onTap: () => widget.onNext(_selectedIndex),
@@ -277,7 +269,6 @@ class _GoalTypeSelectionScreenState extends State<GoalTypeSelectionScreen> {
                 ),
                 const SizedBox(width: 16),
                 
-                // Текстовий блок
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
