@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:test_app/models/user_data.dart';
+import '../../widgets/dynamic_glow_button.dart'; 
 import 'fourth_screen_meet.dart';
 
 class ANameScreen extends StatefulWidget {
@@ -11,13 +12,29 @@ class ANameScreen extends StatefulWidget {
 }
 
 class _ANameScreenState extends State<ANameScreen> {
-  // Контролер для зчитування введеного імені
   final TextEditingController _nameController = TextEditingController();
+  bool _isButtonActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_onNameChanged);
+  }
 
   @override
   void dispose() {
+    _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
     super.dispose();
+  }
+
+  void _onNameChanged() {
+    final bool isNotEmpty = _nameController.text.trim().isNotEmpty;
+    if (isNotEmpty != _isButtonActive) {
+      setState(() {
+        _isButtonActive = isNotEmpty;
+      });
+    }
   }
 
   void _submitName(String value) {
@@ -28,7 +45,7 @@ class _ANameScreenState extends State<ANameScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ASixthScreen(), 
+          builder: (context) => const ASixthScreen(), 
         ),
       );
     }
@@ -90,7 +107,7 @@ class _ANameScreenState extends State<ANameScreen> {
           Positioned(
             left: 40,
             right: 40,
-            bottom: 120 * scaleY, 
+            bottom: 150 * scaleY,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
               decoration: ShapeDecoration(
@@ -128,6 +145,36 @@ class _ANameScreenState extends State<ANameScreen> {
                   ),
                 ),
               ),
+            ),
+          ),
+
+          Positioned(
+            bottom: 30,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: [
+                DynamicGlowButton(
+                  text: 'Продовжити далі',
+                  isActive: _isButtonActive,
+                  onTap: () => _submitName(_nameController.text),
+                ),
+                const SizedBox(height: 20),
+                const Opacity(
+                  opacity: 0.70,
+                  child: Text(
+                    'Це завжди можна змінити у профілі',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color(0xFFF9FFFA),
+                      fontSize: 13,
+                      fontFamily: 'Inter',
+                      fontWeight: FontWeight.w300,
+                      height: 1,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
