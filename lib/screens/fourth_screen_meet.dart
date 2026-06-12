@@ -18,84 +18,85 @@ class ASixthScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFF041219),
-      body: Stack(
-        children: [
-          Positioned(
-            left: -17 * scaleX,
-            top: -416 * scaleY,
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 75.0, sigmaY: 75.0),
-              child: Container(
-                width: 363 * scaleX,
-                height: 577 * scaleY,
-                decoration: const ShapeDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment(0.19, -0.03),
-                    end: Alignment(0.68, 0.81),
-                    colors: [
-                      Color(0xFFFFCC00),
-                      Color(0xFF91FFA4),
-                      Color(0xFF2BBCFF),
-                    ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () async {
+          LoadingHelper.show(context);
+          await saveUserToFirebase();
+          if (!context.mounted) return; 
+
+          LoadingHelper.hide(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainNavigationScreen(),
+            ),
+          );
+        },
+        child: Stack(
+          children: [
+            Positioned(
+              left: -17 * scaleX,
+              top: -416 * scaleY,
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 75.0, sigmaY: 75.0),
+                child: Container(
+                  width: 363 * scaleX,
+                  height: 577 * scaleY,
+                  decoration: const ShapeDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment(0.19, -0.03),
+                      end: Alignment(0.68, 0.81),
+                      colors: [
+                        Color(0xFFFFCC00),
+                        Color(0xFF91FFA4),
+                        Color(0xFF2BBCFF),
+                      ],
+                    ),
+                    shape: OvalBorder(),
                   ),
-                  shape: OvalBorder(),
                 ),
               ),
             ),
-          ),
 
-          Positioned(
-            left: 40,
-            top: 100 * scaleY,
-            width: 280 * scaleX,
-            child: const Text(
-              'Приємно\nпознайомитися',
-              style: TextStyle(
-                color: Color(0xFFF9FFFA),
-                fontSize: 24,
-                fontFamily: 'Tenor Sans',
-                fontWeight: FontWeight.w400,
-                height: 1,
+            Positioned(
+              left: 40,
+              top: 100 * scaleY,
+              width: 280 * scaleX,
+              child: const Text(
+                'Приємно\nпознайомитися',
+                style: TextStyle(
+                  color: Color(0xFFF9FFFA),
+                  fontSize: 24,
+                  fontFamily: 'Tenor Sans',
+                  fontWeight: FontWeight.w400,
+                  height: 1,
+                ),
               ),
             ),
-          ),
 
-          Positioned(
-            top: 176 * scaleY,
-            right: 40 * scaleX,
-            left: 150 * scaleX,
-            child: Text(
-              UserData.userName,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                color: Color(0xFFF9FFFA),
-                fontSize: 24,
-                fontFamily: 'Tenor Sans',
-                fontWeight: FontWeight.w400,
-                height: 1,
+            Positioned(
+              top: 176 * scaleY,
+              right: 40 * scaleX,
+              left: 150 * scaleX,
+              child: Text(
+                UserData.userName,
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  color: Color(0xFFF9FFFA),
+                  fontSize: 24,
+                  fontFamily: 'Tenor Sans',
+                  fontWeight: FontWeight.w400,
+                  height: 1,
+                ),
               ),
             ),
-          ),
 
-          Positioned(
-            bottom: 60,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: GestureDetector(
-                onTap: () async {
-                  LoadingHelper.show(context);
-                  await saveUserToFirebase();
-                  if (!context.mounted) return; 
-
-                  LoadingHelper.hide(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MainNavigationScreen(),
-                    ),
-                  );
-                },
+            Positioned(
+              bottom: 60,
+              left: 0,
+              right: 0,
+              child: Center(
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -125,8 +126,8 @@ class ASixthScreen extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
