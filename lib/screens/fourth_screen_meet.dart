@@ -20,7 +20,6 @@ class ASixthScreen extends StatelessWidget {
       backgroundColor: const Color(0xFF041219),
       body: Stack(
         children: [
-          // Gradient glow
           Positioned(
             left: -17 * scaleX,
             top: -416 * scaleY,
@@ -45,7 +44,6 @@ class ASixthScreen extends StatelessWidget {
             ),
           ),
 
-          // "Приємно познайомитися"
           Positioned(
             left: 40,
             top: 100 * scaleY,
@@ -62,12 +60,13 @@ class ASixthScreen extends StatelessWidget {
             ),
           ),
 
-          // User name
           Positioned(
-            left: 263 * scaleX,
             top: 176 * scaleY,
+            right: 40 * scaleX,
+            left: 150 * scaleX,
             child: Text(
               UserData.userName,
+              textAlign: TextAlign.right,
               style: const TextStyle(
                 color: Color(0xFFF9FFFA),
                 fontSize: 24,
@@ -78,7 +77,6 @@ class ASixthScreen extends StatelessWidget {
             ),
           ),
 
-          // Fingerprint button
           Positioned(
             bottom: 60,
             left: 0,

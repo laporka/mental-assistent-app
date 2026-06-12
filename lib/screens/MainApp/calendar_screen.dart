@@ -213,13 +213,20 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
   Widget _buildTaskCard(DailyTaskItem task) {
     final Color itemColor = Color(task.colorValue);
 
+    final Color titleColor = task.isCompleted ? const Color(0xFF041219) : const Color(0xFFF9FFFA);
+    final Color subtitleColor = task.isCompleted ? const Color(0x99041219) : const Color(0xFFBCC4C2);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: task.isCompleted ? EdgeInsets.zero : const EdgeInsets.only(left: 3),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: task.isCompleted
-            ? const LinearGradient(begin: Alignment.centerLeft, end: Alignment.centerRight, colors: [Color(0xFFFFCC00), Color(0xFF91FFA4), Color(0xFF2BBBFF)])
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF2BBBFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
+              )
             : LinearGradient(colors: [itemColor, itemColor]), 
       ),
       child: GestureDetector(
@@ -229,7 +236,9 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
             color: task.isCompleted ? Colors.transparent : const Color(0xFF1D2A30),
-            borderRadius: task.isCompleted ? BorderRadius.circular(20) : const BorderRadius.horizontal(right: Radius.circular(20), left: Radius.circular(17)),
+            borderRadius: task.isCompleted 
+                ? BorderRadius.circular(20) 
+                : const BorderRadius.horizontal(right: Radius.circular(20), left: Radius.circular(17)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -238,24 +247,37 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(task.time, style: TextStyle(color: task.isCompleted ? const Color(0xCCF9FFFA) : const Color(0xFFBCC4C2), fontSize: 12, fontFamily: 'Inter')),
+                    Text(
+                      task.time, 
+                      style: TextStyle(color: subtitleColor, fontSize: 12, fontFamily: 'Inter')
+                    ),
                     const SizedBox(height: 4),
-                    Text(task.title, style: const TextStyle(color: Color(0xFFF9FFFA), fontSize: 20, fontFamily: 'Inter', fontWeight: FontWeight.w500)),
+                    Text(
+                      task.title, 
+                      style: TextStyle(color: titleColor, fontSize: 20, fontFamily: 'Inter', fontWeight: FontWeight.w500)
+                    ),
                     if (task.subtitle.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(task.subtitle, style: TextStyle(color: task.isCompleted ? const Color(0xCCF9FFFA) : const Color(0xFFBCC4C2), fontSize: 12, fontFamily: 'Inter')),
+                      Text(
+                        task.subtitle, 
+                        style: TextStyle(color: subtitleColor, fontSize: 12, fontFamily: 'Inter')
+                      ),
                     ]
                   ],
                 ),
               ),
               Container(
-                width: 40, height: 40,
+                width: 40, 
+                height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: task.isCompleted ? const Color(0x33041219) : Colors.transparent,
-                  border: Border.all(color: task.isCompleted ? const Color(0xFF91FFA4) : const Color(0xFF333F44), width: task.isCompleted ? 0 : 1.5),
+                  border: Border.all(
+                    color: task.isCompleted ? Colors.transparent : const Color(0xFF333F44), 
+                    width: task.isCompleted ? 0 : 1.5
+                  ),
                 ),
-                child: task.isCompleted ? const Icon(Icons.check, color: Color(0xFF91FFA4), size: 24) : null,
+                child: task.isCompleted ? const Icon(Icons.check, color: Color(0xFF041219), size: 24) : null,
               )
             ],
           ),

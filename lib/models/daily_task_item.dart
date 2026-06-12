@@ -1,10 +1,10 @@
 class DailyTaskItem {
   final String id;
-  final String type; // 'goal' або 'tracker'
+  final String type;
   final String title;
-  final String subtitle; // Наприклад: '3 рази в день'
-  final String time; // '09:00' або '09:00 (1)'
-  final int colorValue; // Колір для градієнта
+  final String subtitle;
+  final String time;
+  final int colorValue;
   final bool isCompleted;
 
   DailyTaskItem({
