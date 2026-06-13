@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../widgets/loading_helper.dart';
 import '../../../widgets/dynamic_glow_button.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 
 class ProfileScreen extends StatefulWidget {
@@ -461,8 +462,72 @@ class IntegrationsSettingsView extends StatefulWidget {
 }
 
 class _IntegrationsSettingsViewState extends State<IntegrationsSettingsView> {
-  final String _geminiKey = 'AQ.Ab***************************';
-  final String _openAiKey = '';
+  // Ініціалізуємо безпечне сховище
+  final _storage = const FlutterSecureStorage();
+  final TextEditingController _keyController = TextEditingController();
+
+  bool _isLoading = true;
+  bool _isEditing = false;
+  String _savedKey = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadKey();
+  }
+
+  @override
+  void dispose() {
+    _keyController.dispose();
+    super.dispose();
+  }
+
+  // Завантажуємо ключ при відкритті екрана
+  Future<void> _loadKey() async {
+    try {
+      String? key = await _storage.read(key: 'gemini_api_key');
+      setState(() {
+        _savedKey = key ?? '';
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _saveKey() async {
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    String newKey = _keyController.text.trim();
+    try {
+      if (newKey.isEmpty) {
+        await _storage.delete(key: 'gemini_api_key');
+      } else {
+        await _storage.write(key: 'gemini_api_key', value: newKey);
+      }
+      
+      setState(() {
+        _savedKey = newKey;
+        _isEditing = false;
+        _isLoading = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Ключ успішно збережено!')));
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Помилка збереження: $e')));
+      }
+    }
+  }
+
+  String _getMaskedKey(String key) {
+    if (key.length <= 8) return '********';
+    return '${key.substring(0, 4)}****************${key.substring(key.length - 4)}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -471,6 +536,7 @@ class _IntegrationsSettingsViewState extends State<IntegrationsSettingsView> {
       body: SafeArea(
         child: Column(
           children: [
+            // Шапка
             Padding(
               padding: const EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 20),
               child: Row(
@@ -483,8 +549,11 @@ class _IntegrationsSettingsViewState extends State<IntegrationsSettingsView> {
             ),
             Container(width: double.infinity, height: 1, color: const Color(0xFF333F44).withValues(alpha: 0.5)),
 
+            // Контент
             Expanded(
-              child: SingleChildScrollView(
+              child: _isLoading 
+                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF2BBBFF)))
+                  : SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                 child: Column(
@@ -499,22 +568,107 @@ class _IntegrationsSettingsViewState extends State<IntegrationsSettingsView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Підключи власний ключ\nGemini або OpenAI', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', fontWeight: FontWeight.w500, height: 1.3)),
+                          const Text('Підключи власний ключ\nGemini', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', fontWeight: FontWeight.w500, height: 1.3)),
                           const SizedBox(height: 8),
                           const Text('Iris буде використовувати його замість\nстандартного', style: TextStyle(color: Color(0xFFBCC4C2), fontSize: 12, fontFamily: 'Inter', height: 1.4)),
                           const SizedBox(height: 24),
 
                           const Text('Gemini API Key', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', fontWeight: FontWeight.w500)),
                           const SizedBox(height: 12),
-                          _buildApiKeyField(value: _geminiKey, hintText: 'Gemini API Key', hasValue: _geminiKey.isNotEmpty),
-                          const SizedBox(height: 24),
+                          
+                          // --- ЛОГІКА ПЕРЕКЛЮЧЕННЯ (Перегляд <-> Редагування) ---
+                          if (_isEditing) ...[
+                            // СТАН РЕДАГУВАННЯ (ВВІД)
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              decoration: BoxDecoration(color: const Color(0xFF27363D), borderRadius: BorderRadius.circular(12)),
+                              child: TextField(
+                                controller: _keyController,
+                                style: const TextStyle(color: Color(0xFF91FFA4), fontSize: 14, fontFamily: 'Inter'),
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: 'Вставте ваш ключ',
+                                  hintStyle: TextStyle(color: Color(0xFF4B895E)),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () => setState(() => _isEditing = false),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: const Color(0xFF333F44)),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Center(child: Text('Скасувати', style: TextStyle(color: Color(0xFFBCC4C2), fontSize: 14, fontFamily: 'Inter', fontWeight: FontWeight.w500))),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: _saveKey,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      decoration: BoxDecoration(color: const Color(0xFF4B895E), borderRadius: BorderRadius.circular(12)),
+                                      child: const Center(child: Text('Зберегти', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 14, fontFamily: 'Inter', fontWeight: FontWeight.w500))),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          ] else ...[
+                            // СТАН ПЕРЕГЛЯДУ
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(color: const Color(0xFF27363D), borderRadius: BorderRadius.circular(12)),
+                              child: Text(
+                                _savedKey.isNotEmpty ? _getMaskedKey(_savedKey) : 'Немає підключеного ключа',
+                                style: TextStyle(color: _savedKey.isNotEmpty ? const Color(0xFF91FFA4) : const Color(0xFF4B895E), fontSize: 14, fontFamily: 'Inter'),
+                                maxLines: 1, overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _keyController.text = _savedKey; // Передаємо поточний ключ у поле вводу
+                                  _isEditing = true;
+                                });
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(color: const Color(0xFF27363D), borderRadius: BorderRadius.circular(12)),
+                                child: Center(child: Text(_savedKey.isNotEmpty ? 'Змінити' : 'Додати ключ', style: const TextStyle(color: Color(0xFF91FFA4), fontSize: 14, fontFamily: 'Inter', fontWeight: FontWeight.w500))),
+                              ),
+                            ),
+                            // Кнопка видалення (показується тільки якщо ключ вже є)
+                            if (_savedKey.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              GestureDetector(
+                                onTap: () {
+                                  _keyController.clear();
+                                  _saveKey(); // Збереження пустого ключа дорівнює його видаленню
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  decoration: BoxDecoration(color: Colors.transparent, border: Border.all(color: const Color(0xFFE27B58).withValues(alpha: 0.5)), borderRadius: BorderRadius.circular(12)),
+                                  child: const Center(child: Text('Видалити ключ', style: TextStyle(color: Color(0xFFE27B58), fontSize: 14, fontFamily: 'Inter', fontWeight: FontWeight.w500))),
+                                ),
+                              ),
+                            ]
+                          ],
 
-                          const Text('OpenAI API Key', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', fontWeight: FontWeight.w500)),
-                          const SizedBox(height: 12),
-                          _buildApiKeyField(value: _openAiKey, hintText: 'OpenAI API Key', hasValue: _openAiKey.isNotEmpty),
-
                           const SizedBox(height: 24),
-                          const Text('Ключі зберігаються лише локально на\nпристрої', style: TextStyle(color: Color(0xFFBCC4C2), fontSize: 12, fontFamily: 'Inter', height: 1.4)),
+                          const Text('Ключ зберігається лише локально на\nпристрої у зашифрованому вигляді', style: TextStyle(color: Color(0xFFBCC4C2), fontSize: 12, fontFamily: 'Inter', height: 1.4)),
                         ],
                       ),
                     ),
@@ -526,36 +680,6 @@ class _IntegrationsSettingsViewState extends State<IntegrationsSettingsView> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildApiKeyField({required String value, required String hintText, required bool hasValue}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(color: const Color(0xFF27363D), borderRadius: BorderRadius.circular(12)),
-          child: Text(
-            hasValue ? value : hintText,
-            style: TextStyle(color: hasValue ? const Color(0xFF91FFA4) : const Color(0xFF4B895E), fontSize: 14, fontFamily: 'Inter'),
-            maxLines: 1, overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        if (hasValue) ...[
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () {},
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(color: const Color(0xFF27363D), borderRadius: BorderRadius.circular(12)),
-              child: const Center(child: Text('Змінити', style: TextStyle(color: Color(0xFF91FFA4), fontSize: 14, fontFamily: 'Inter', fontWeight: FontWeight.w500))),
-            ),
-          ),
-        ]
-      ],
     );
   }
 }

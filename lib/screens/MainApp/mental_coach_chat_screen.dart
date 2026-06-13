@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../widgets/typing_indicator.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -15,16 +16,31 @@ class MentalCoachChatScreen extends StatefulWidget {
   State<MentalCoachChatScreen> createState() => _MentalCoachChatScreenState();
 }
 
-class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
+// 1. ДОДАЛИ AutomaticKeepAliveClientMixin
+class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with AutomaticKeepAliveClientMixin {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
   final String? uid = FirebaseAuth.instance.currentUser?.uid;
   bool _isLoading = false;
+
+  Stream<QuerySnapshot>? _chatStream;
+
+  // 2. КАЖЕМО FLUTTER ЗБЕРІГАТИ СТАН ЕКРАНУ
+  @override
+  bool get wantKeepAlive => true; 
 
   @override
   void initState() {
     super.initState();
     
+    if (uid != null) {
+      _chatStream = FirebaseFirestore.instance
+          .collection('users').doc(uid).collection('coach_chat')
+          .orderBy('timestamp', descending: true)
+          .snapshots();
+    }
+
     if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
       _messageController.text = widget.initialMessage!;
       
@@ -34,12 +50,20 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty || uid == null) return;
 
     _messageController.clear();
-    FocusScope.of(context).unfocus();
+    _focusNode.unfocus(); 
 
     final newMessageRef = await FirebaseFirestore.instance.collection('users').doc(uid).collection('coach_chat').add({
       'text': text,
@@ -50,6 +74,9 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
     setState(() => _isLoading = true);
 
     try {
+      const storage = FlutterSecureStorage();
+      String? userApiKey = await storage.read(key: 'gemini_api_key');
+
       final historySnapshot = await FirebaseFirestore.instance
           .collection('users').doc(uid).collection('coach_chat')
           .orderBy('timestamp', descending: true)
@@ -72,6 +99,7 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
       final result = await callable.call({
         'text': text,
         'history': chatHistory,
+        'apiKey': userApiKey, 
       });
       
       final aiResponse = result.data['response'];
@@ -92,6 +120,8 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // 3. ОБОВ'ЯЗКОВИЙ ВИКЛИК ДЛЯ ЗБЕРЕЖЕННЯ СТАНУ
+
     return Scaffold(
       backgroundColor: const Color(0xFF041219),
       appBar: PreferredSize(
@@ -105,7 +135,7 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(width: 48), // Компенсація для центрування
+              const SizedBox(width: 48), 
               const Expanded(
                 child: Center(
                   child: Text('Розмова', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 24, fontFamily: 'Tenor Sans')),
@@ -137,15 +167,14 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
           ),
 
           Expanded(
-            child: uid == null
-                ? const Center(child: Text('Помилка авторизації'))
+            child: uid == null || _chatStream == null
+                ? const Center(child: Text('Помилка авторизації', style: TextStyle(color: Colors.white)))
                 : StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('users').doc(uid).collection('coach_chat')
-                        .orderBy('timestamp', descending: true) // Читаємо з кінця
-                        .snapshots(),
+                    stream: _chatStream, 
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
+                      
+                      // 4. ЗМІНИЛИ ПЕРЕВІРКУ: тепер не буде блимати, якщо дані вже є
+                      if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator(color: Color(0xFF2BBBFF)));
                       }
 
@@ -199,6 +228,7 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
                   Expanded(
                     child: TextField(
                       controller: _messageController,
+                      focusNode: _focusNode, 
                       style: const TextStyle(color: Color(0xFF041219), fontSize: 16, fontFamily: 'Inter'),
                       decoration: const InputDecoration(
                         hintText: 'Напиши ...',
@@ -250,7 +280,6 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Твоя красива градієнтна лінія з макету
             Container(
               width: 2,
               margin: const EdgeInsets.only(bottom: 16),
@@ -275,13 +304,9 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> {
                         : MarkdownBody(
                             data: text ?? '',
                             styleSheet: MarkdownStyleSheet(
-                              // Звичайний текст
                               p: const TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', height: 1.3),
-                              // Жирний текст (те, що в зірочках **)
                               strong: const TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', fontWeight: FontWeight.bold),
-                              // Маркери списків
-                              listBullet: const TextStyle(color: Color(0xFF2BBBFF), fontSize: 16), // Можна зробити їх вашим фірмовим блакитним!
-                              // Відступи між пунктами списку
+                              listBullet: const TextStyle(color: Color(0xFF2BBBFF), fontSize: 16),
                               listIndent: 20,
                               blockSpacing: 8,
                             ),

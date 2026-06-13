@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../../models/daily_task_item.dart';
 import '../../models/tracker_model.dart';
@@ -64,15 +65,26 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchDailyQuote() async {
     setState(() => _isLoadingQuote = true);
     try {
+      const storage = FlutterSecureStorage();
+      String? userApiKey = await storage.read(key: 'gemini_api_key');
+      
+      print('📱 ВІДПРАВКА З ТЕЛЕФОНУ: Ключ ${userApiKey != null ? "ЗНАЙДЕНО ($userApiKey)" : "ВІДСУТНІЙ"}');
+
       final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('chatWithMentalCoach');
       final result = await callable.call({
         'text': 'Згенеруй одне коротке, надихаюче побажання або мотиваційну думку на сьогодні. 1-2 речення. Без привітань, тільки сам текст.',
         'history': [],
+        'apiKey': userApiKey,
       });
       
-      if (mounted) setState(() => _dailyQuote = result.data['response'] as String);
+      if (mounted) {
+        setState(() => _dailyQuote = result.data['response'] as String);
+      }
     } catch (e) {
-      if (mounted) setState(() => _dailyQuote = "Навіть маленький крок — це рух. Головне — що ти йдеш."); 
+      print('❌ Помилка: $e');
+      if (mounted) {
+        setState(() => _dailyQuote = "Навіть маленький крок — це рух. Головне — що ти йдеш."); 
+      }
     } finally {
       if (mounted) setState(() => _isLoadingQuote = false);
     }
