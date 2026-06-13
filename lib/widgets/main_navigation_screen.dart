@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../screens/MainApp/diary_screen.dart';
 import '../screens/MainApp/calendar_screen.dart';
 import '../screens/MainApp/home_screen.dart';
+import '../screens/MainApp/mental_coach_chat_screen.dart';
 import 'chat_tab_wrapper.dart';
 import '../screens/MainApp/profile/profile_screen.dart';
 
@@ -15,11 +16,11 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _currentIndex = 0;
-  String? _pendingMessage;
 
   void _navigateToChat(String message) {
+    globalChatMessageNotifier.value = message;
+    
     setState(() {
-      _pendingMessage = message;
       _currentIndex = 2;
     });
   }
@@ -32,13 +33,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final List<Widget> screens = [
       HomeScreen(onNavigateToChat: _navigateToChat),
       const DiaryHomeScreen(),
-      ChatTabWrapper(initialMessage: _pendingMessage),
+      const ChatTabWrapper(),
       const CalendarHomeScreen(),
       const ProfileScreen(),
     ];
 
     return Scaffold(
       backgroundColor: const Color(0xFF041219),
+      
       body: IndexedStack(
         index: _currentIndex,
         children: screens,
@@ -76,9 +78,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       onTap: () {
         setState(() {
           _currentIndex = index;
-          if (index != 2) {
-            _pendingMessage = null; 
-          }
         });
       },
       behavior: HitTestBehavior.opaque,

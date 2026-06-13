@@ -7,16 +7,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../widgets/typing_indicator.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-class MentalCoachChatScreen extends StatefulWidget {
-  final String? initialMessage;
 
-  const MentalCoachChatScreen({super.key, this.initialMessage});
+final ValueNotifier<String?> globalChatMessageNotifier = ValueNotifier(null);
+
+class MentalCoachChatScreen extends StatefulWidget {
+  const MentalCoachChatScreen({super.key});
 
   @override
   State<MentalCoachChatScreen> createState() => _MentalCoachChatScreenState();
 }
 
-// 1. ДОДАЛИ AutomaticKeepAliveClientMixin
 class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with AutomaticKeepAliveClientMixin {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -26,9 +26,8 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with Auto
 
   Stream<QuerySnapshot>? _chatStream;
 
-  // 2. КАЖЕМО FLUTTER ЗБЕРІГАТИ СТАН ЕКРАНУ
   @override
-  bool get wantKeepAlive => true; 
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -41,8 +40,18 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with Auto
           .snapshots();
     }
 
-    if (widget.initialMessage != null && widget.initialMessage!.isNotEmpty) {
-      _messageController.text = widget.initialMessage!;
+    globalChatMessageNotifier.addListener(_onGlobalMessageReceived);
+    
+    if (globalChatMessageNotifier.value != null) {
+      _onGlobalMessageReceived();
+    }
+  }
+
+  void _onGlobalMessageReceived() {
+    final msg = globalChatMessageNotifier.value;
+    if (msg != null && msg.isNotEmpty) {
+      _messageController.text = msg;
+      globalChatMessageNotifier.value = null;
       
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _sendMessage();
@@ -52,6 +61,7 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with Auto
 
   @override
   void dispose() {
+    globalChatMessageNotifier.removeListener(_onGlobalMessageReceived);
     _messageController.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
@@ -63,7 +73,6 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with Auto
     if (text.isEmpty || uid == null) return;
 
     _messageController.clear();
-    _focusNode.unfocus(); 
 
     final newMessageRef = await FirebaseFirestore.instance.collection('users').doc(uid).collection('coach_chat').add({
       'text': text,
@@ -99,7 +108,7 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with Auto
       final result = await callable.call({
         'text': text,
         'history': chatHistory,
-        'apiKey': userApiKey, 
+        'apiKey': userApiKey,
       });
       
       final aiResponse = result.data['response'];
@@ -120,7 +129,7 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with Auto
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // 3. ОБОВ'ЯЗКОВИЙ ВИКЛИК ДЛЯ ЗБЕРЕЖЕННЯ СТАНУ
+    super.build(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF041219),
@@ -168,12 +177,11 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with Auto
 
           Expanded(
             child: uid == null || _chatStream == null
-                ? const Center(child: Text('Помилка авторизації', style: TextStyle(color: Colors.white)))
+                ? const Center(child: Text('Помилка авторизації'))
                 : StreamBuilder<QuerySnapshot>(
                     stream: _chatStream, 
                     builder: (context, snapshot) {
                       
-                      // 4. ЗМІНИЛИ ПЕРЕВІРКУ: тепер не буде блимати, якщо дані вже є
                       if (!snapshot.hasData) {
                         return const Center(child: CircularProgressIndicator(color: Color(0xFF2BBBFF)));
                       }
@@ -228,7 +236,7 @@ class _MentalCoachChatScreenState extends State<MentalCoachChatScreen> with Auto
                   Expanded(
                     child: TextField(
                       controller: _messageController,
-                      focusNode: _focusNode, 
+                      focusNode: _focusNode,
                       style: const TextStyle(color: Color(0xFF041219), fontSize: 16, fontFamily: 'Inter'),
                       decoration: const InputDecoration(
                         hintText: 'Напиши ...',
