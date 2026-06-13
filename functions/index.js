@@ -7,6 +7,15 @@ exports.chatWithMentalCoach = onCall(async (request) => {
         const userText = request.data.text;
         const history = request.data.history || [];
 
+        const customApiKey = request.data.apiKey; 
+
+        if (customApiKey && customApiKey.trim() !== '') {
+            const masked = customApiKey.substring(0, 4) + '***' + customApiKey.substring(customApiKey.length - 4);
+            logger.info("✅ Запит прийшов з КАСТОМНИМ ключем користувача:", masked);
+        } else {
+            logger.info("⚠️ Кастомного ключа немає. Використовуємо СТАНДАРТНИЙ ключ сервера.");
+        }
+
         let validHistory = [];
         let expectedRole = "user";
 
@@ -30,12 +39,14 @@ exports.chatWithMentalCoach = onCall(async (request) => {
             validHistory.pop();
         }
 
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) {
-            throw new Error("Ключ API не знайдено в налаштуваннях сервера!");
+        const defaultApiKey = process.env.GEMINI_API_KEY;
+        const apiKeyToUse = (customApiKey && customApiKey.trim() !== '') ? customApiKey : defaultApiKey;
+
+        if (!apiKeyToUse) {
+            throw new Error("Ключ API не знайдено (ні користувацького, ні стандартного)!");
         }
 
-        const genAI = new GoogleGenerativeAI(apiKey);
+        const genAI = new GoogleGenerativeAI(apiKeyToUse);
         const model = genAI.getGenerativeModel({
             model: "gemini-2.5-flash", 
             systemInstruction: `Ти — професійний ментал-коуч та персональний ментор у мобільному додатку ByteForge для трекінгу звичок та цілей. Твоя місія — допомагати користувачеві знаходити внутрішню мотивацію, дисципліну та баланс у житті. 
