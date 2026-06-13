@@ -189,7 +189,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         else ...[
                           _buildTagsWrap(interests),
                           const SizedBox(height: 8),
-                          if (interests.length > 5) const Align(alignment: Alignment.centerRight, child: Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFFF9FFFA))),
+                          // if (interests.length > 5) const Align(alignment: Alignment.centerRight, child: Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFFF9FFFA))),
                         ],
                         const SizedBox(height: 24),
 
@@ -356,84 +356,87 @@ class AboutAppView extends StatelessWidget {
 
           SafeArea(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Важливо', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 36, fontFamily: 'Tenor Sans')),
-                        const SizedBox(height: 8),
-                        const Text('Бета-версія Iris', style: TextStyle(color: Color(0xFF91FFA4), fontSize: 20, fontFamily: 'Inter', fontWeight: FontWeight.w500)),
-                        const SizedBox(height: 32),
-
-                        const Text('Ми постійно вдосконалюємось.\nЗараз Iris — це\nекспериментальний інструмент.', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', height: 1.4, fontWeight: FontWeight.w400)),
-                        const SizedBox(height: 24),
-                        const Text('Будь ласка, прочитай кілька\nважливих моментів.', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', height: 1.4, fontWeight: FontWeight.w400)),
-                        const SizedBox(height: 32),
-
-                        Row(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: Center(
+                      child: SizedBox(
+                        width: 280,
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              width: 32, height: 32,
-                              decoration: const BoxDecoration(color: Color(0xFF27363D), shape: BoxShape.circle),
-                              child: const Icon(Icons.close, color: Color(0xFFFFCC00), size: 18),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: RichText(
-                                text: const TextSpan(
-                                  style: TextStyle(fontSize: 15, fontFamily: 'Inter', height: 1.4),
-                                  children: [
-                                    TextSpan(text: 'Не діліться конфіденційною\nінформацією: ', style: TextStyle(color: Color(0xFFFFCC00))),
-                                    TextSpan(text: 'паролями,\nданими банківських карток\nабо документами.', style: TextStyle(color: Color(0xFFF9FFFA))),
-                                  ],
+                            const Text('Важливо', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 36, fontFamily: 'Tenor Sans')),
+                            const SizedBox(height: 8),
+                            const Text('Бета-версія Iris', style: TextStyle(color: Color(0xFF91FFA4), fontSize: 20, fontFamily: 'Inter', fontWeight: FontWeight.w500)),
+                            const SizedBox(height: 32),
+
+                            const Text('Ми постійно вдосконалюємось.\nЗараз Iris — це\nекспериментальний інструмент.', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', height: 1.4, fontWeight: FontWeight.w400)),
+                            const SizedBox(height: 24),
+                            const Text('Будь ласка, прочитай кілька\nважливих моментів.', style: TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter', height: 1.4, fontWeight: FontWeight.w400)),
+                            const SizedBox(height: 32),
+
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 32, height: 32,
+                                  decoration: const BoxDecoration(color: Color(0xFF27363D), shape: BoxShape.circle),
+                                  child: const Icon(Icons.close, color: Color(0xFFFFCC00), size: 18),
                                 ),
-                              ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: RichText(
+                                    text: const TextSpan(
+                                      style: TextStyle(fontSize: 15, fontFamily: 'Inter', height: 1.4),
+                                      children: [
+                                        TextSpan(text: 'Не діліться конфіденційною\nінформацією: ', style: TextStyle(color: Color(0xFFFFCC00))),
+                                        TextSpan(text: 'паролями,\nданими банківських карток\nабо документами.', style: TextStyle(color: Color(0xFFF9FFFA))),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 32, height: 32,
+                                  decoration: const BoxDecoration(color: Color(0xFF27363D), shape: BoxShape.circle),
+                                  child: const Icon(Icons.check, color: Color(0xFF91FFA4), size: 18),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: RichText(
+                                    text: const TextSpan(
+                                      style: TextStyle(fontSize: 15, fontFamily: 'Inter', height: 1.4),
+                                      children: [
+                                        TextSpan(text: 'Давайте зосередимось на\nваших ', style: TextStyle(color: Color(0xFFF9FFFA))),
+                                        TextSpan(text: 'почуттях та думках.', style: TextStyle(color: Color(0xFF91FFA4))),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
-
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 32, height: 32,
-                              decoration: const BoxDecoration(color: Color(0xFF27363D), shape: BoxShape.circle),
-                              child: const Icon(Icons.check, color: Color(0xFF91FFA4), size: 18),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: RichText(
-                                text: const TextSpan(
-                                  style: TextStyle(fontSize: 15, fontFamily: 'Inter', height: 1.4),
-                                  children: [
-                                    TextSpan(text: 'Давайте зосередимось на\nваших ', style: TextStyle(color: Color(0xFFF9FFFA))),
-                                    TextSpan(text: 'почуттях та думках.', style: TextStyle(color: Color(0xFF91FFA4))),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
 
-
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Center(
                     child: DynamicGlowButton(
                       text: 'Зрозуміло',
                       isActive: true,
-                      onTap: onBack,
+                      onTap: onBack, 
                     ),
                   ),
                 ),
