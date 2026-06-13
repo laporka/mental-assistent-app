@@ -212,33 +212,26 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
 
   Widget _buildTaskCard(DailyTaskItem task) {
     final Color itemColor = Color(task.colorValue);
-
     final Color titleColor = task.isCompleted ? const Color(0xFF041219) : const Color(0xFFF9FFFA);
     final Color subtitleColor = task.isCompleted ? const Color(0x99041219) : const Color(0xFFBCC4C2);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: task.isCompleted ? EdgeInsets.zero : const EdgeInsets.only(left: 3),
+      padding: task.isCompleted ? EdgeInsets.zero : const EdgeInsets.only(left: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: task.isCompleted
-            ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF2BBBFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
-              )
+            ? const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF2BBBFF), Color(0xFF91FFA4), Color(0xFFFFCC00)])
             : LinearGradient(colors: [itemColor, itemColor]), 
       ),
       child: GestureDetector(
-        onTap: () => _toggleTaskCompletion(task),
+        onTap: () => _toggleTaskCompletion(task), 
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Трохи зменшили horizontal padding для крапок
           decoration: BoxDecoration(
             color: task.isCompleted ? Colors.transparent : const Color(0xFF1D2A30),
-            borderRadius: task.isCompleted 
-                ? BorderRadius.circular(20) 
-                : const BorderRadius.horizontal(right: Radius.circular(20), left: Radius.circular(17)),
+            borderRadius: task.isCompleted ? BorderRadius.circular(20) : const BorderRadius.horizontal(right: Radius.circular(20), left: Radius.circular(16)),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -247,43 +240,151 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      task.time, 
-                      style: TextStyle(color: subtitleColor, fontSize: 12, fontFamily: 'Inter')
-                    ),
+                    Text(task.time, style: TextStyle(color: subtitleColor, fontSize: 12, fontFamily: 'Inter')),
                     const SizedBox(height: 4),
-                    Text(
-                      task.title, 
-                      style: TextStyle(color: titleColor, fontSize: 20, fontFamily: 'Inter', fontWeight: FontWeight.w500)
-                    ),
+                    Text(task.title, style: TextStyle(color: titleColor, fontSize: 20, fontFamily: 'Inter', fontWeight: FontWeight.w400)),
                     if (task.subtitle.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(
-                        task.subtitle, 
-                        style: TextStyle(color: subtitleColor, fontSize: 12, fontFamily: 'Inter')
-                      ),
+                      Text(task.subtitle, style: TextStyle(color: subtitleColor, fontSize: 12, fontFamily: 'Inter')),
                     ]
                   ],
                 ),
               ),
-              Container(
-                width: 40, 
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: task.isCompleted ? const Color(0x33041219) : Colors.transparent,
-                  border: Border.all(
-                    color: task.isCompleted ? Colors.transparent : const Color(0xFF333F44), 
-                    width: task.isCompleted ? 0 : 1.5
+              
+              // Блок Галочка + Три крапки
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: task.isCompleted ? const Color(0x33041219) : Colors.transparent,
+                      border: Border.all(color: task.isCompleted ? Colors.transparent : const Color(0xFF333F44), width: task.isCompleted ? 0 : 1.5),
+                    ),
+                    child: task.isCompleted ? const Icon(Icons.check, color: Color(0xFF041219), size: 24) : null,
                   ),
-                ),
-                child: task.isCompleted ? const Icon(Icons.check, color: Color(0xFF041219), size: 24) : null,
+                  const SizedBox(width: 4),
+                  
+                  // Меню з крапками
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      cardColor: const Color(0xFF041319), // Фон випадаючого меню
+                    ),
+                    child: PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: titleColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: Color(0xFF1D2A30)),
+                      ),
+                      onSelected: (value) {
+                        if (value == 'delete') {
+                          _showDeleteConfirmationDialog(task);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, color: Color(0xFFE27B58), size: 20),
+                              SizedBox(width: 8),
+                              Text('Видалити', style: TextStyle(color: Color(0xFFE27B58), fontFamily: 'Inter', fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               )
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _showDeleteConfirmationDialog(DailyTaskItem task) async {
+    String confirmationText = '';
+    
+    final bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final bool isMatch = confirmationText.trim().toLowerCase() == task.title.trim().toLowerCase();
+            
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1D2A30),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Text('Видалення', style: TextStyle(color: Color(0xFFF9FFFA), fontFamily: 'Tenor Sans', fontSize: 24)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      style: const TextStyle(color: Color(0xFFBCC4C2), fontSize: 14, fontFamily: 'Inter', height: 1.4),
+                      children: [
+                        const TextSpan(text: 'Щоб видалити назавжди, введіть назву:\n'),
+                        TextSpan(text: task.title, style: const TextStyle(color: Color(0xFFF9FFFA), fontWeight: FontWeight.bold, fontSize: 16)),
+                      ]
+                    )
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    onChanged: (val) => setState(() => confirmationText = val),
+                    style: const TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter'),
+                    decoration: InputDecoration(
+                      hintText: 'Введіть назву',
+                      hintStyle: const TextStyle(color: Color(0xFF4B895E), fontSize: 14),
+                      filled: true,
+                      fillColor: const Color(0xFF041219),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Скасувати', style: TextStyle(color: Color(0xFFBCC4C2), fontFamily: 'Inter', fontWeight: FontWeight.w500)),
+                ),
+                TextButton(
+                  onPressed: isMatch ? () => Navigator.of(context).pop(true) : null,
+                  child: Text('Видалити', style: TextStyle(
+                    color: isMatch ? const Color(0xFFE27B58) : const Color(0xFFE27B58).withOpacity(0.3), 
+                    fontFamily: 'Inter', 
+                    fontWeight: FontWeight.w600
+                  )),
+                ),
+              ],
+            );
+          }
+        );
+      }
+    );
+
+    if (shouldDelete == true) {
+      _deleteTask(task);
+    }
+  }
+
+  Future<void> _deleteTask(DailyTaskItem task) async {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    
+    LoadingHelper.show(context);
+    try {
+      String collection = task.type == 'tracker' ? 'trackers' : 'goals';
+      await FirebaseFirestore.instance.collection('users').doc(uid).collection(collection).doc(task.id).delete();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Помилка: $e')));
+    } finally {
+      if (mounted) LoadingHelper.hide(context);
+    }
   }
 
   Widget _buildProgressSection(List<QueryDocumentSnapshot> trackerDocs, List<QueryDocumentSnapshot> goalDocs) {
@@ -645,13 +746,11 @@ class _CalendarWidgetState extends State<_CalendarWidget> {
     return Column(key: key, children: rows);
   }
 
-  // --- ЛОГІКА МАЛЮВАННЯ КЛІТИНКИ З КРАПОЧКАМИ ---
   Widget _buildCell(DateTime date, {required bool inMonth}) {
     final selected = _isSameDay(date, widget.selectedDate);
     final today = _isToday(date);
     final highlighted = selected || today;
 
-    // Отримуємо задачі саме для цієї конкретної дати
     final tasksForDay = widget.getTasksForDate(date);
     
     // Групуємо по ID (щоб трекер, який п'ють 3 рази, давав лише одну крапочку)

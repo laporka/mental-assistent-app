@@ -19,7 +19,6 @@ import 'create_goal_screen.dart';
 import 'goal_type_selection_screen.dart';
 import 'create_record_screen.dart';
 
-
 class HomeScreen extends StatefulWidget {
   final Function(String) onNavigateToChat;
   
@@ -68,8 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
       const storage = FlutterSecureStorage();
       String? userApiKey = await storage.read(key: 'gemini_api_key');
       
-      print('📱 ВІДПРАВКА З ТЕЛЕФОНУ: Ключ ${userApiKey != null ? "ЗНАЙДЕНО ($userApiKey)" : "ВІДСУТНІЙ"}');
-
       final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable('chatWithMentalCoach');
       final result = await callable.call({
         'text': 'Згенеруй одне коротке, надихаюче побажання або мотиваційну думку на сьогодні. 1-2 речення. Без привітань, тільки сам текст.',
@@ -81,7 +78,6 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() => _dailyQuote = result.data['response'] as String);
       }
     } catch (e) {
-      print('❌ Помилка: $e');
       if (mounted) {
         setState(() => _dailyQuote = "Навіть маленький крок — це рух. Головне — що ти йдеш."); 
       }
@@ -98,6 +94,92 @@ class _HomeScreenState extends State<HomeScreen> {
       FocusScope.of(context).unfocus();
     }
   }
+
+
+
+  Future<void> _showDeleteConfirmationDialog(DailyTaskItem task) async {
+    String confirmationText = '';
+    
+    final bool? shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final bool isMatch = confirmationText.trim().toLowerCase() == task.title.trim().toLowerCase();
+            
+            return AlertDialog(
+              backgroundColor: const Color(0xFF1D2A30),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: const Text('Видалення', style: TextStyle(color: Color(0xFFF9FFFA), fontFamily: 'Tenor Sans', fontSize: 24)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      style: const TextStyle(color: Color(0xFFBCC4C2), fontSize: 14, fontFamily: 'Inter', height: 1.4),
+                      children: [
+                        const TextSpan(text: 'Щоб видалити назавжди, введіть назву:\n'),
+                        TextSpan(text: task.title, style: const TextStyle(color: Color(0xFFF9FFFA), fontWeight: FontWeight.bold, fontSize: 16)),
+                      ]
+                    )
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    onChanged: (val) => setState(() => confirmationText = val),
+                    style: const TextStyle(color: Color(0xFFF9FFFA), fontSize: 16, fontFamily: 'Inter'),
+                    decoration: InputDecoration(
+                      hintText: 'Введіть назву',
+                      hintStyle: const TextStyle(color: Color(0xFF4B895E), fontSize: 14),
+                      filled: true,
+                      fillColor: const Color(0xFF041219),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Скасувати', style: TextStyle(color: Color(0xFFBCC4C2), fontFamily: 'Inter', fontWeight: FontWeight.w500)),
+                ),
+                TextButton(
+                  onPressed: isMatch ? () => Navigator.of(context).pop(true) : null,
+                  child: Text('Видалити', style: TextStyle(
+                    color: isMatch ? const Color(0xFFE27B58) : const Color(0xFFE27B58).withOpacity(0.3), 
+                    fontFamily: 'Inter', 
+                    fontWeight: FontWeight.w600
+                  )),
+                ),
+              ],
+            );
+          }
+        );
+      }
+    );
+
+    if (shouldDelete == true) {
+      _deleteTask(task);
+    }
+  }
+
+  Future<void> _deleteTask(DailyTaskItem task) async {
+    final String? uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    
+    LoadingHelper.show(context);
+    try {
+      String collection = task.type == 'tracker' ? 'trackers' : 'goals';
+      await FirebaseFirestore.instance.collection('users').doc(uid).collection(collection).doc(task.id).delete();
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Помилка: $e')));
+    } finally {
+      if (mounted) LoadingHelper.hide(context);
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -439,6 +521,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
+
   Widget _buildHomeTaskCard(DailyTaskItem task) {
     final Color itemColor = Color(task.colorValue);
     final Color titleColor = task.isCompleted ? const Color(0xFF041219) : const Color(0xFFF9FFFA);
@@ -457,7 +541,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: () => _toggleTaskCompletion(task), 
         behavior: HitTestBehavior.opaque,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Трохи зменшили horizontal padding для крапок
           decoration: BoxDecoration(
             color: task.isCompleted ? Colors.transparent : const Color(0xFF1D2A30),
             borderRadius: task.isCompleted ? BorderRadius.circular(20) : const BorderRadius.horizontal(right: Radius.circular(20), left: Radius.circular(16)),
@@ -479,14 +563,53 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              Container(
-                width: 40, height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: task.isCompleted ? const Color(0x33041219) : Colors.transparent,
-                  border: Border.all(color: task.isCompleted ? Colors.transparent : const Color(0xFF333F44), width: task.isCompleted ? 0 : 1.5),
-                ),
-                child: task.isCompleted ? const Icon(Icons.check, color: Color(0xFF041219), size: 24) : null,
+              
+              // Блок Галочка + Три крапки
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: task.isCompleted ? const Color(0x33041219) : Colors.transparent,
+                      border: Border.all(color: task.isCompleted ? Colors.transparent : const Color(0xFF333F44), width: task.isCompleted ? 0 : 1.5),
+                    ),
+                    child: task.isCompleted ? const Icon(Icons.check, color: Color(0xFF041219), size: 24) : null,
+                  ),
+                  const SizedBox(width: 4),
+                  
+                  // Меню з крапками
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      cardColor: const Color(0xFF041319), // Фон випадаючого меню
+                    ),
+                    child: PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: titleColor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: Color(0xFF1D2A30)),
+                      ),
+                      onSelected: (value) {
+                        if (value == 'delete') {
+                          _showDeleteConfirmationDialog(task);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(Icons.delete_outline, color: Color(0xFFE27B58), size: 20),
+                              SizedBox(width: 8),
+                              Text('Видалити', style: TextStyle(color: Color(0xFFE27B58), fontFamily: 'Inter', fontWeight: FontWeight.w500)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               )
             ],
           ),
@@ -494,6 +617,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+
 
   Widget _buildHomeDiaryCard(DiaryRecordModel record) {
     String dateStr = DateFormat('dd.MM.yyyy').format(record.createdAt);
