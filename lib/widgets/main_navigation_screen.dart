@@ -4,12 +4,7 @@ import '../screens/MainApp/diary_screen.dart';
 import '../screens/MainApp/calendar_screen.dart';
 import '../screens/MainApp/home_screen.dart';
 import 'chat_tab_wrapper.dart';
-
-class ProfileScreenPlaceholder extends StatelessWidget { 
-  const ProfileScreenPlaceholder({super.key}); 
-  @override 
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Профіль'))); 
-}
+import '../screens/MainApp/profile/profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -39,7 +34,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       const DiaryHomeScreen(),
       ChatTabWrapper(initialMessage: _pendingMessage),
       const CalendarHomeScreen(),
-      const ProfileScreenPlaceholder(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
