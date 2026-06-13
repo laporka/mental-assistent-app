@@ -5,7 +5,9 @@ import '../screens/MainApp/empty_main_home_screen.dart';
 import '../screens/MainApp/mental_coach_chat_screen.dart';
 
 class ChatTabWrapper extends StatefulWidget {
-  const ChatTabWrapper({super.key});
+  final String? initialMessage;
+
+  const ChatTabWrapper({super.key, this.initialMessage});
 
   @override
   State<ChatTabWrapper> createState() => _ChatTabWrapperState();
@@ -25,8 +27,10 @@ class _ChatTabWrapperState extends State<ChatTabWrapper> {
       );
     }
 
-    if (_pendingMessage != null) {
-      return MentalCoachChatScreen(initialMessage: _pendingMessage);
+    final String? activeMessage = widget.initialMessage ?? _pendingMessage;
+
+    if (activeMessage != null) {
+      return MentalCoachChatScreen(initialMessage: activeMessage);
     }
 
     return StreamBuilder<QuerySnapshot>(
@@ -50,12 +54,11 @@ class _ChatTabWrapperState extends State<ChatTabWrapper> {
           return AHomeEmptyScreen(
             onSendFirstMessage: (text) {
               setState(() {
-                _pendingMessage = text; // Це змусить Wrapper миттєво переключити UI
+                _pendingMessage = text;
               });
             },
           );
         } else {
-          // 4. Якщо історія є -> малюємо повноцінний чат
           return const MentalCoachChatScreen();
         }
       },

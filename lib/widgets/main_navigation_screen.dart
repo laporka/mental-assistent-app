@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../screens/MainApp/diary_screen.dart';
 import '../screens/MainApp/calendar_screen.dart';
+import '../screens/MainApp/home_screen.dart';
 import 'chat_tab_wrapper.dart';
 
-class HomeScreenPlaceholder extends StatelessWidget { const HomeScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Головна Панель'))); }
-class ProfileScreenPlaceholder extends StatelessWidget { const ProfileScreenPlaceholder({super.key}); @override Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Профіль'))); }
+class ProfileScreenPlaceholder extends StatelessWidget { 
+  const ProfileScreenPlaceholder({super.key}); 
+  @override 
+  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Профіль'))); 
+}
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -15,7 +19,15 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  int _currentIndex = 2;
+  int _currentIndex = 0;
+  String? _pendingMessage;
+
+  void _navigateToChat(String message) {
+    setState(() {
+      _pendingMessage = message;
+      _currentIndex = 2;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +35,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final double scaleX = size.width / 360;
 
     final List<Widget> screens = [
-      const HomeScreenPlaceholder(),
+      HomeScreen(onNavigateToChat: _navigateToChat),
       const DiaryHomeScreen(),
-      const ChatTabWrapper(),
+      ChatTabWrapper(initialMessage: _pendingMessage),
       const CalendarHomeScreen(),
       const ProfileScreenPlaceholder(),
     ];
@@ -66,7 +78,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     final bool isActive = _currentIndex == index;
 
     return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+          if (index != 2) {
+            _pendingMessage = null; 
+          }
+        });
+      },
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -76,7 +95,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               ? const LinearGradient(
                   begin: Alignment(1.00, 0.00),
                   end: Alignment(0.00, 1.00),
-                  colors: [Color(0xFF2BBCFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
+                  colors: [Color(0xFF2BBBFF), Color(0xFF91FFA4), Color(0xFFFFCC00)],
                 )
               : null,
           boxShadow: isActive
