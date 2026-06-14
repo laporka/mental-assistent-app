@@ -10,6 +10,7 @@ import '../../models/daily_task_item.dart';
 import '../../models/tracker_model.dart';
 import '../../models/goal_model.dart';
 import '../../models/diary_record_model.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/loading_helper.dart';
 
 import '../../widgets/save_tracker.dart';
@@ -172,6 +173,9 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       String collection = task.type == 'tracker' ? 'trackers' : 'goals';
       await FirebaseFirestore.instance.collection('users').doc(uid).collection(collection).doc(task.id).delete();
+
+      String pureTime = task.time.split(' ')[0];
+      await NotificationService().cancelReminder('${task.id}_$pureTime'.hashCode);
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Помилка: $e')));
     } finally {
@@ -267,10 +271,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     
                     Align(
                       alignment: Alignment.centerRight,
-                      child: Container(
-                        width: 24, height: 24,
-                        decoration: const BoxDecoration(color: Color(0xFF04131A), shape: BoxShape.circle),
-                        child: const Center(child: Icon(Icons.question_mark_rounded, color: Color(0xFFF9FFFA), size: 16)),
+                      child: GestureDetector(
+                        onTap: () async {
+                          // ВИКЛИКАЄМО ТЕСТОВЕ СПОВІЩЕННЯ!
+                          await NotificationService().showInstantNotification();
+                        },
+                        child: Container(
+                          width: 24, height: 24,
+                          decoration: const BoxDecoration(color: Color(0xFF04131A), shape: BoxShape.circle),
+                          child: const Center(child: Icon(Icons.question_mark_rounded, color: Color(0xFFF9FFFA), size: 16)),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../services/notification_service.dart';
 import '../../widgets/loading_helper.dart';
 import '../../widgets/save_tracker.dart';
 import '../../widgets/save_goal.dart';
@@ -380,6 +381,9 @@ class _CalendarHomeScreenState extends State<CalendarHomeScreen> {
     try {
       String collection = task.type == 'tracker' ? 'trackers' : 'goals';
       await FirebaseFirestore.instance.collection('users').doc(uid).collection(collection).doc(task.id).delete();
+
+      String pureTime = task.time.split(' ')[0];
+      await NotificationService().cancelReminder('${task.id}_$pureTime'.hashCode);
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Помилка: $e')));
     } finally {
